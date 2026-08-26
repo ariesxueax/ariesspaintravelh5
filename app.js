@@ -46,6 +46,10 @@
     return `${segment.distanceKm} km · 约 ${hours.toFixed(1)} 小时`;
   }
 
+  function coachEstimateText(segment) {
+    return `${segment.distanceKm} km · 预计 ${(segment.distanceKm / 75).toFixed(1)} 小时`;
+  }
+
   function cityNameForRoute(day) {
     return day.route.filter(city => city !== "杭州").join(" · ") || "杭州";
   }
@@ -115,7 +119,7 @@
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(segment => `${segment.distanceKm} km`).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
   }
 
   function citiesView() {
