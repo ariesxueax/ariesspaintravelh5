@@ -1,0 +1,57 @@
+/* Local names make the city guide easier to use while preserving Chinese as the primary navigation label. */
+.city-local-name {
+  display: inline-block;
+  margin-left: 8px;
+  color: #f3d7a9;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  vertical-align: .16em;
+}
+
+.city-hero-local-name {
+  display: inline;
+  margin-left: 10px;
+  color: #f4d9ac;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  vertical-align: .13em;
+}
+
+.spot-name > b {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.spot-local-name {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #7a8781;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheet-hero h2 {
+  line-height: 1.15;
+}
+
+.sheet-local-name {
+  display: block;
+  margin-top: 5px;
+  color: #f4d9ac;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
