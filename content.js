@@ -155,6 +155,29 @@ window.ROADBOOK_CONTENT = {
       "葡萄牙鳕鱼餐": "Bacalhau à Brás"
     }
   },
+  foodExperiences: [
+    { name: "西班牙海鲜饭", local: "Paella valenciana", detail: "D4 · 晚餐特色餐" },
+    { name: "百年葡式蛋挞", local: "Pastéis de Belém", detail: "D9 · 特别品尝" },
+    { name: "葡萄牙鳕鱼餐", local: "Bacalhau", detail: "D9 · 晚餐特色餐" }
+  ],
+  spotNotices: {
+    "La Roca购物村": {
+      title: "不购物怎么走",
+      text: "原行程在此安排不少于 2 小时 30 分钟。若不购物，先与领队确认集合时间，再打车约 15 分钟到 Cardedeu 老城，在 Carrer Major、Plaça de Sant Joan 与圣母教堂一带散步、喝咖啡；往返至少预留 30 分钟，不建议自行跑到更远的海岸或山地。"
+    },
+    "自由大道": {
+      title: "不购物怎么走",
+      text: "自由大道安排不少于 1 小时 30 分钟。若集合点在南端 Restauradores 附近，可乘荣耀升降机 Elevador da Glória 上坡，步行至圣佩德罗·阿尔坎塔拉观景台 Miradouro de São Pedro de Alcântara，再到普林西比雷阿尔花园 Jardim do Príncipe Real；全程约 60 至 75 分钟，需预留回到集合点的时间。"
+    },
+    "阿尔罕布拉宫": {
+      title: "预约与替代提示",
+      text: "原行程提示：阿宫实行限流，参观时间以预约获批为准；若预约未获批，将以阿宫后花园或塞维利亚王宫替代，并增加阿尔拜辛区约 30 分钟自由活动，具体以团队当天通知为准。"
+    },
+    "佛朗明戈表演": {
+      title: "行程包含",
+      text: "原行程注明：表演入内不少于 1 小时，含 1 杯饮料；具体场馆以当天安排为准。"
+    }
+  },
   cities: {
     "马德里": {
       en: "Madrid", country: "西班牙", image: "madrid", days: "D2 · 09/30",
