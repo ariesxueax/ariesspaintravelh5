@@ -45,6 +45,7 @@
       "date": "2026-09-29",
       "weekday": "星期二",
       "route": ["杭州"],
+      "meals": {"breakfast": "×", "lunch": "×", "dinner": "×"},
       "transport": ["flight"],
       "segments": [],
       "visits": [],
@@ -55,6 +56,7 @@
       "date": "2026-09-30",
       "weekday": "星期三",
       "route": ["杭州", "马德里", "萨拉戈萨"],
+      "meals": {"breakfast": "×", "lunch": "含", "dinner": "含"},
       "transport": ["flight", "coach"],
       "segments": [
         {"from": "杭州", "to": "马德里", "mode": "flight", "distanceKm": null, "duration": "约13小时30分", "reference": "JD605 00:30-08:00（当地时间）"},
@@ -74,6 +76,7 @@
       "date": "2026-10-01",
       "weekday": "星期四",
       "route": ["萨拉戈萨", "巴塞罗那"],
+      "meals": {"breakfast": "含", "lunch": "含", "dinner": "含"},
       "transport": ["coach"],
       "segments": [
         {"from": "萨拉戈萨", "to": "巴塞罗那", "mode": "coach", "distanceKm": 325, "duration": null, "reference": "原文：大巴约325公里"}
@@ -91,6 +94,7 @@
       "date": "2026-10-02",
       "weekday": "星期五",
       "route": ["巴塞罗那"],
+      "meals": {"breakfast": "含", "lunch": "含", "dinner": "西班牙海鲜饭"},
       "transport": ["coach"],
       "segments": [],
       "visits": [
@@ -105,6 +109,7 @@
       "date": "2026-10-03",
       "weekday": "星期六",
       "route": ["巴塞罗那", "塔拉戈纳", "佩尼斯科拉", "瓦伦西亚"],
+      "meals": {"breakfast": "含", "lunch": "含", "dinner": "含"},
       "transport": ["coach"],
       "segments": [
         {"from": "巴塞罗那", "to": "塔拉戈纳", "mode": "coach", "distanceKm": 98, "duration": null, "reference": "原文：大巴约98公里"},
@@ -126,6 +131,7 @@
       "date": "2026-10-04",
       "weekday": "星期日",
       "route": ["瓦伦西亚", "格拉纳达"],
+      "meals": {"breakfast": "含", "lunch": "含", "dinner": "含"},
       "transport": ["coach"],
       "segments": [
         {"from": "瓦伦西亚", "to": "格拉纳达", "mode": "coach", "distanceKm": 500, "duration": null, "reference": "原文：大巴约500公里"}
@@ -142,6 +148,7 @@
       "date": "2026-10-05",
       "weekday": "星期一",
       "route": ["格拉纳达", "米哈斯", "龙达", "塞维利亚"],
+      "meals": {"breakfast": "含", "lunch": "含", "dinner": "含"},
       "transport": ["coach"],
       "segments": [
         {"from": "格拉纳达", "to": "米哈斯", "mode": "coach", "distanceKm": 155, "duration": null, "reference": "原文：大巴约155公里"},
@@ -160,6 +167,7 @@
       "date": "2026-10-06",
       "weekday": "星期二",
       "route": ["塞维利亚", "埃武拉"],
+      "meals": {"breakfast": "含", "lunch": "含", "dinner": "含"},
       "transport": ["coach"],
       "segments": [
         {"from": "塞维利亚", "to": "埃武拉", "mode": "coach", "distanceKm": 325, "duration": null, "reference": "原文：大巴约325公里"}
@@ -180,6 +188,7 @@
       "date": "2026-10-07",
       "weekday": "星期三",
       "route": ["埃武拉", "罗卡角", "里斯本"],
+      "meals": {"breakfast": "含", "lunch": "含", "dinner": "葡萄牙鳕鱼餐"},
       "transport": ["coach"],
       "segments": [
         {"from": "埃武拉", "to": "罗卡角", "mode": "coach", "distanceKm": 166, "duration": null, "reference": "原文：大巴约166公里"},
@@ -202,6 +211,7 @@
       "date": "2026-10-08",
       "weekday": "星期四",
       "route": ["里斯本", "杭州"],
+      "meals": {"breakfast": "含", "lunch": "×", "dinner": "×"},
       "transport": ["flight"],
       "segments": [
         {"from": "里斯本", "to": "杭州", "mode": "flight", "distanceKm": null, "duration": "约13小时15分", "reference": "JD622 11:55-08:10+1（当地时间）"}
@@ -213,6 +223,7 @@
       "date": "2026-10-09",
       "weekday": "星期五",
       "route": ["杭州"],
+      "meals": {"breakfast": "×", "lunch": "×", "dinner": "×"},
       "transport": [],
       "segments": [],
       "visits": [],
