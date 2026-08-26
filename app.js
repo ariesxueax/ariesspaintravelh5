@@ -122,7 +122,7 @@
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点，绿点为吃与带走；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#2f8a57"></i>吃与带走</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点，黄点为吃与带走；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#e6ae2d"></i>吃与带走</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
   }
 
   function citiesView() {
@@ -131,7 +131,8 @@
 
   function cityCard(city) {
     const profile = C.cities[city];
-    return `<button class="city-card" data-city-page="${esc(city)}"><img data-image-preview src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><span class="city-arrow"><i data-lucide="arrow-up-right"></i></span><div class="city-card-body"><small>${esc(profile.days)} · ${esc(profile.country)}</small><h2>${esc(city)}</h2><p>${esc(profile.culture)}</p></div></button>`;
+    const highlights = C.cityGuideHighlights?.[city] || { style: "城市建筑脉络", makers: "塑造这座城市的人" };
+    return `<button class="city-card" data-city-page="${esc(city)}"><img data-image-preview src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><span class="city-arrow"><i data-lucide="arrow-up-right"></i></span><div class="city-card-body"><small>${esc(profile.days)} · ${esc(profile.country)}</small><h2>${esc(city)}</h2><div class="city-highlights"><span class="city-highlight"><b>建筑风格</b><i>${esc(highlights.style)}</i></span><span class="city-highlight"><b>关键影响人</b><i>${esc(highlights.makers)}</i></span></div></div></button>`;
   }
 
   function cityView(city) {
@@ -190,7 +191,7 @@
     element.className = className;
     element.setAttribute("aria-label", name);
     if (className === "city-marker") element.innerHTML = `<span>${esc(name)}</span>`;
-    const color = className === "city-marker" ? "#c85b4d" : className === "food-marker" ? "#2f8a57" : "#2d6f91";
+    const color = className === "city-marker" ? "#c85b4d" : className === "food-marker" ? "#e6ae2d" : "#2d6f91";
     element.style.cssText = `width:${className === "city-marker" ? 14 : 10}px;height:${className === "city-marker" ? 14 : 10}px;border:2px solid #fff;border-radius:50%;background:${color};box-shadow:0 1px 5px rgba(0,0,0,.28);padding:0;`;
     new mapboxgl.Marker({ element }).setLngLat(coordinates).setPopup(new mapboxgl.Popup({ offset: 14 }).setHTML(`<b>${esc(name)}</b><span>${esc(subtitle)}</span>`)).addTo(state.map);
   }
