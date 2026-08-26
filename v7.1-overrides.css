@@ -1,0 +1,135 @@
+/* Original itinerary details: meal coverage, minimum stays, and practical alternatives. */
+.food-experiences {
+  margin: 18px 18px 0;
+  padding: 15px 0 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.food-experiences-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.food-experiences-head h2 {
+  margin: 3px 0 0;
+  color: var(--forest);
+  font-size: 18px;
+}
+
+.food-experiences-head > span {
+  color: var(--coral);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.food-experience-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.food-experience {
+  min-width: 0;
+  padding-left: 9px;
+  border-left: 2px solid var(--gold);
+}
+
+.food-experience b,
+.food-experience i,
+.food-experience small {
+  display: block;
+}
+
+.food-experience b {
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.food-experience i {
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--forest);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.food-experience small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.route-day-line > div {
+  min-width: 0;
+}
+
+.route-meals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.meal-status {
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.meal-status.included {
+  color: #286342;
+  background: #e5f0e8;
+}
+
+.meal-status.excluded {
+  color: #7f827e;
+  background: #edf0eb;
+}
+
+.meal-status.special {
+  color: #875624;
+  background: #f4e6cf;
+}
+
+.spot-stay {
+  display: block;
+  margin-top: 4px;
+  color: #8b6130;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.spot-notice {
+  margin: 18px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 3px solid var(--gold);
+}
+
+.sheet-body .spot-notice h3 {
+  margin-top: 0;
+  color: #745223;
+}
+
+.spot-notice p {
+  color: #4c514b;
+}
+
+@media (max-width: 360px) {
+  .food-experience-list { gap: 7px; }
+  .food-experience { padding-left: 7px; }
+  .food-experience b { font-size: 11px; }
+}
