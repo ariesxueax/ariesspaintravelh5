@@ -1,0 +1,142 @@
+.exchange-tool {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+}
+
+.exchange-rate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+  background: #edf0e9;
+}
+
+.exchange-rate > span {
+  color: var(--forest);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.exchange-rate label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.exchange-rate input {
+  width: 52px;
+  min-height: 29px;
+  padding: 0 4px;
+  border: 1px solid #b9c6ba;
+  border-radius: 4px;
+  color: var(--forest);
+  background: white;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.exchange-source {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  background: #f8f8f3;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.exchange-source svg {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  color: var(--gold);
+}
+
+.exchange-fields {
+  display: grid;
+  gap: 10px;
+  padding: 16px 14px 14px;
+}
+
+.exchange-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fbfaf6;
+}
+
+.exchange-field span {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.exchange-field small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.exchange-field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 9px;
+  border: 0;
+  border-bottom: 2px solid #b4884f;
+  border-radius: 0;
+  color: var(--forest);
+  background: transparent;
+  font-size: 20px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.exchange-field input:focus,
+.exchange-rate input:focus {
+  outline: 2px solid #2f8a57;
+  outline-offset: 2px;
+}
+
+.exchange-direction {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -2px auto;
+  border: 1px solid #c9d1c6;
+  border-radius: 50%;
+  color: var(--forest);
+  background: #eef1eb;
+}
+
+.exchange-direction svg {
+  width: 14px;
+  height: 14px;
+}
+
+.exchange-note {
+  margin: 0;
+  padding: 0 14px 15px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
