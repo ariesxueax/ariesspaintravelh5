@@ -12,13 +12,6 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const preloadScreen = document.getElementById("preloadScreen");
-  const preloadProgress = document.getElementById("preloadProgress");
-  const imagePreloadPromise = preloadAllImages();
-  const previewGate = Promise.race([
-    imagePreloadPromise.then(() => "complete"),
-    new Promise(resolve => window.setTimeout(() => resolve("timeout"), 3000))
-  ]);
   const itinerary = await fetch("data/itinerary-extraction.json").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
@@ -32,10 +25,14 @@
     "行前": ["护照、身份证与签证材料分开放置", "国际段建议提前 3 小时抵达机场", "移动电源与备用锂电池必须随身携带", "随团 WiFi：2 人 1 台，行程结束统一回收", "返程跨日抵达杭州，预留次日休整时间"],
     "必备物品": ["内衣、内裤、袜子 ×7", "睡衣 1 套、拖鞋", "钱包、零钱袋、锁封袋", "烧水杯、泡腾片、转换插头", "垃圾袋、雨衣或雨伞", "过敏药、止泻药、退烧药、晕车药", "湿纸巾、洗脸巾、化妆棉、卫生巾", "洗护用品、防晒、帽子", "U 盘、3C 认证充电宝、数据线", "充电头、Pocket、耳机", "墨镜、零食、现金"],
     "应用": ["Google Maps：步行、餐厅与公交查询", "Google Translate：离线下载西班牙语、葡萄牙语", "WhatsApp：酒店与当地联络", "Uber / Bolt：城市内叫车备用", "XE Currency：欧元汇率与消费换算"],
-    "当地注意": ["餐厅晚餐时间普遍较晚，热门地点建议提前订位", "教堂与宫殿依现场规定着装，避免露肩与过短下装", "热门景区与地铁站留意随身包，不在街边外露证件", "西葡插座常见 C / F 型，准备欧标转换头", "水和公厕不一定随处免费，备少量硬币更方便"]
+    "当地注意": ["餐厅晚餐时间普遍较晚，热门地点建议提前订位", "教堂与宫殿依现场规定着装，避免露肩与过短下装", "热门景区与地铁站留意随身包，不在街边外露证件", "西葡插座常见 C / F 型，准备欧标转换头", "水和公厕不一定随处免费，备少量硬币更方便"],
+    "汇率转换": []
   };
   const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null, mapFocus: null };
   const savedChecks = JSON.parse(localStorage.getItem("iberia.mobile.checks") || "{}");
+  const savedExchangeRate = Number(localStorage.getItem("iberia.mobile.exchange-rate"));
+  let exchangeRate = Number.isFinite(savedExchangeRate) && savedExchangeRate > 0 ? savedExchangeRate : 7.8;
+  let exchangeRateRevision = 0;
   const allVisits = itinerary.days.flatMap(day => day.visits.filter(visit => !visit.modes.includes("conditional")).map(visit => ({ ...visit, day: day.day, date: day.date })));
   const cityOrder = itinerary.routeNodes.map(node => node.nameZh).filter((city, index, list) => C.cities[city] && list.indexOf(city) === index);
   const cityVisits = city => allVisits.filter(visit => visit.city === city);
@@ -50,46 +47,6 @@
     const cityKey = profile?.image || "cover";
     const key = imageAssetKeys.has(preferredKey) ? preferredKey : imageAssetKeys.has(cityKey) ? cityKey : "cover";
     return `assets/images/${key}.jpg`;
-  }
-
-  function preloadAllImages() {
-    const urls = [...imageAssetKeys].map(key => `assets/images/${key}.jpg`);
-    const maxConcurrent = 6;
-    let nextIndex = 0;
-    let completed = 0;
-    preloadProgress.textContent = `0 / ${urls.length}`;
-
-    return new Promise(resolve => {
-      const finishOne = () => {
-        completed += 1;
-        preloadProgress.textContent = `${completed} / ${urls.length}`;
-        if (completed === urls.length) {
-          resolve();
-          return;
-        }
-        loadNext();
-      };
-
-      const loadNext = () => {
-        const url = urls[nextIndex];
-        nextIndex += 1;
-        if (!url) return;
-        const image = new Image();
-        image.decoding = "async";
-        image.onload = finishOne;
-        image.onerror = finishOne;
-        image.src = url;
-      };
-
-      for (let index = 0; index < Math.min(maxConcurrent, urls.length); index += 1) loadNext();
-    });
-  }
-
-  async function revealPreview() {
-    await previewGate;
-    preloadScreen.classList.add("is-hidden");
-    preloadScreen.setAttribute("aria-hidden", "true");
-    window.setTimeout(() => preloadScreen.remove(), 260);
   }
 
   function modeTags(modes = []) {
@@ -238,7 +195,61 @@
       const id = `${active}-${index}`;
       return `<label class="check-row ${savedChecks[id] ? "done" : ""}"><input type="checkbox" data-check="${esc(id)}" ${savedChecks[id] ? "checked" : ""}><span>${esc(item)}</span></label>`;
     }).join("");
-    return `<section class="view checklist-view"><header class="checklist-header"><div class="eyebrow">Ready to go</div><h1>旅行清单</h1><p>勾选会保留在当前设备，出发前可随时核对。</p></header><div class="checklist-tabs">${Object.keys(checkSections).map(name => `<button class="check-tab ${active === name ? "active" : ""}" data-check-section="${name}">${name}</button>`).join("")}</div><div class="check-panel">${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/29 00:30 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div></div></section>`;
+    const subtitle = active === "汇率转换" ? "自动读取 EUR/CNY 日参考汇率，也可手动修改。" : "勾选会保留在当前设备，出发前可随时核对。";
+    const content = active === "汇率转换" ? exchangeTool() : `${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/29 00:30 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div>`;
+    return `<section class="view checklist-view"><header class="checklist-header"><div class="eyebrow">Ready to go</div><h1>旅行清单</h1><p>${subtitle}</p></header><div class="checklist-tabs">${Object.keys(checkSections).map(name => `<button class="check-tab ${active === name ? "active" : ""}" data-check-section="${name}">${name}</button>`).join("")}</div><div class="check-panel">${content}</div></section>`;
+  }
+
+  function exchangeTool() {
+    const eurAmount = 100;
+    const cnyAmount = eurAmount * exchangeRate;
+    return `<section class="exchange-tool" aria-label="欧元人民币汇率转换"><div class="exchange-rate"><span>参考汇率</span><label>1 EUR = <input data-exchange-rate type="number" inputmode="decimal" min="0.01" step="0.0001" value="${formatExchangeRate(exchangeRate)}"> CNY</label></div><p class="exchange-source"><i data-lucide="refresh-cw"></i><span data-exchange-status aria-live="polite">正在更新 ECB 日参考汇率...</span></p><div class="exchange-fields"><label class="exchange-field"><span>欧元<small>EUR</small></span><input data-currency-input="eur" type="number" inputmode="decimal" min="0" step="0.01" value="${formatCurrencyAmount(eurAmount)}"></label><span class="exchange-direction" aria-hidden="true"><i data-lucide="arrow-down-up"></i></span><label class="exchange-field"><span>人民币<small>CNY</small></span><input data-currency-input="cny" type="number" inputmode="decimal" min="0" step="0.01" value="${formatCurrencyAmount(cnyAmount)}"></label></div><p class="exchange-note">实时数据由 Frankfurter 提供，基于欧洲央行日参考汇率；实际以银行、信用卡或换汇点的最终结算汇率为准。</p></section>`;
+  }
+
+  function formatCurrencyAmount(value) {
+    return Number(Math.max(0, value).toFixed(2)).toString();
+  }
+
+  function formatExchangeRate(value) {
+    return Number(value.toFixed(4)).toString();
+  }
+
+  function syncCurrencyConverter(sourceCurrency) {
+    const source = document.querySelector(`[data-currency-input="${sourceCurrency}"]`);
+    const targetCurrency = sourceCurrency === "eur" ? "cny" : "eur";
+    const target = document.querySelector(`[data-currency-input="${targetCurrency}"]`);
+    const value = Number(source?.value);
+    if (!target) return;
+    if (!Number.isFinite(value) || source?.value === "") {
+      target.value = "";
+      return;
+    }
+    target.value = formatCurrencyAmount(sourceCurrency === "eur" ? value * exchangeRate : value / exchangeRate);
+  }
+
+  async function refreshExchangeRate() {
+    const status = document.querySelector("[data-exchange-status]");
+    if (!status) return;
+    const requestRevision = exchangeRateRevision;
+    try {
+      const response = await fetch("https://api.frankfurter.dev/v1/latest?from=EUR&to=CNY");
+      if (!response.ok) throw new Error("汇率服务不可用");
+      const data = await response.json();
+      const nextRate = Number(data.rates?.CNY);
+      if (!Number.isFinite(nextRate) || nextRate <= 0) throw new Error("汇率数据无效");
+      if (requestRevision !== exchangeRateRevision) {
+        status.textContent = "已保留手动输入的参考汇率";
+        return;
+      }
+      exchangeRate = nextRate;
+      localStorage.setItem("iberia.mobile.exchange-rate", exchangeRate.toString());
+      const rateInput = document.querySelector("[data-exchange-rate]");
+      if (rateInput) rateInput.value = formatExchangeRate(exchangeRate);
+      syncCurrencyConverter("eur");
+      status.textContent = `ECB 日参考 · ${data.date}`;
+    } catch {
+      status.textContent = "暂未获取实时汇率，正在使用本地参考值";
+    }
   }
 
   function openSpot(name, city) {
@@ -290,6 +301,7 @@
     refreshIcons();
     window.scrollTo({ top: 0, behavior: "instant" });
     if (state.view === "map") window.setTimeout(initializeMap, 0);
+    if (state.view === "checklist" && state.checklist === "汇率转换") window.setTimeout(refreshExchangeRate, 0);
   }
 
   function refreshIcons() {
@@ -333,6 +345,22 @@
     checkbox.closest("label").classList.toggle("done", checkbox.checked);
   });
 
-  await revealPreview();
+  document.addEventListener("input", event => {
+    const rateInput = event.target.closest("[data-exchange-rate]");
+    if (rateInput) {
+      const nextRate = Number(rateInput.value);
+      if (!Number.isFinite(nextRate) || nextRate <= 0) return;
+      exchangeRate = nextRate;
+      exchangeRateRevision += 1;
+      localStorage.setItem("iberia.mobile.exchange-rate", exchangeRate.toString());
+      const status = document.querySelector("[data-exchange-status]");
+      if (status) status.textContent = "已使用手动输入的参考汇率";
+      syncCurrencyConverter("eur");
+      return;
+    }
+    const currencyInput = event.target.closest("[data-currency-input]");
+    if (currencyInput) syncCurrencyConverter(currencyInput.dataset.currencyInput);
+  });
+
   render();
 })();
