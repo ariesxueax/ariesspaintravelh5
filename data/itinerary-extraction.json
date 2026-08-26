@@ -1,0 +1,228 @@
+{
+  "source": {
+    "file": "行程单 260929VII杭州西葡全四包团WFF-质品杭州西班牙葡萄牙11天8晚（JD）MADLIS（4钻）1671847.pdf",
+    "tourCode": "ETI-SHAPOZXX-260929-07",
+    "title": "杭州西班牙+葡萄牙11天8晚",
+    "departureDate": "2026-09-29",
+    "returnDate": "2026-10-09",
+    "countries": ["中国", "西班牙", "葡萄牙"],
+    "extractionStatus": "verified-against-rendered-pages"
+  },
+  "visitModeLegend": {
+    "flight": "国际航班",
+    "coach": "旅游大巴",
+    "inside": "含门票入内参观",
+    "guided": "含官方导游或行程明确注明官导",
+    "outside": "外观，不进入建筑内部",
+    "distant": "远观",
+    "walk": "现场步行游览，原文未注明入内",
+    "free_time": "自由活动",
+    "shopping": "购物或自由逛店",
+    "show": "入内观看演出",
+    "food": "餐饮体验",
+    "conditional": "仅在原定项目无法执行时启用"
+  },
+  "routeNodes": [
+    {"order": 1, "nameZh": "杭州", "nameEn": "Hangzhou", "country": "中国", "type": "city", "days": [1, 2, 10, 11]},
+    {"order": 2, "nameZh": "马德里", "nameEn": "Madrid", "country": "西班牙", "type": "city", "days": [2]},
+    {"order": 3, "nameZh": "萨拉戈萨", "nameEn": "Zaragoza", "country": "西班牙", "type": "city", "days": [2, 3]},
+    {"order": 4, "nameZh": "巴塞罗那", "nameEn": "Barcelona", "country": "西班牙", "type": "city", "days": [3, 4, 5]},
+    {"order": 5, "nameZh": "塔拉戈纳", "nameEn": "Tarragona", "country": "西班牙", "type": "city", "days": [5]},
+    {"order": 6, "nameZh": "佩尼斯科拉", "nameEn": "Peniscola", "country": "西班牙", "type": "town", "days": [5]},
+    {"order": 7, "nameZh": "瓦伦西亚", "nameEn": "Valencia", "country": "西班牙", "type": "city", "days": [5, 6]},
+    {"order": 8, "nameZh": "格拉纳达", "nameEn": "Granada", "country": "西班牙", "type": "city", "days": [6, 7]},
+    {"order": 9, "nameZh": "米哈斯", "nameEn": "Mijas", "country": "西班牙", "type": "town", "days": [7]},
+    {"order": 10, "nameZh": "龙达", "nameEn": "Ronda", "country": "西班牙", "type": "city", "days": [7]},
+    {"order": 11, "nameZh": "塞维利亚", "nameEn": "Seville", "country": "西班牙", "type": "city", "days": [7, 8]},
+    {"order": 12, "nameZh": "埃武拉", "nameEn": "Evora", "country": "葡萄牙", "type": "city", "days": [8, 9]},
+    {"order": 13, "nameZh": "罗卡角", "nameEn": "Cabo da Roca", "country": "葡萄牙", "type": "landmark", "days": [9]},
+    {"order": 14, "nameZh": "里斯本", "nameEn": "Lisbon", "country": "葡萄牙", "type": "city", "days": [9, 10]},
+    {"order": 15, "nameZh": "杭州", "nameEn": "Hangzhou", "country": "中国", "type": "city", "days": [11]}
+  ],
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-09-29",
+      "weekday": "星期二",
+      "route": ["杭州"],
+      "transport": ["flight"],
+      "segments": [],
+      "visits": [],
+      "notes": ["杭州萧山机场集合，夜间搭乘国际航班前往马德里。"]
+    },
+    {
+      "day": 2,
+      "date": "2026-09-30",
+      "weekday": "星期三",
+      "route": ["杭州", "马德里", "萨拉戈萨"],
+      "transport": ["flight", "coach"],
+      "segments": [
+        {"from": "杭州", "to": "马德里", "mode": "flight", "distanceKm": null, "duration": "约13小时30分", "reference": "JD605 00:30-08:00（当地时间）"},
+        {"from": "马德里", "to": "萨拉戈萨", "mode": "coach", "distanceKm": 325, "duration": null, "reference": "原文：大巴约325公里"}
+      ],
+      "visits": [
+        {"city": "马德里", "nameZh": "马德里皇宫", "nameEn": "Royal Palace of Madrid", "modes": ["inside", "guided"], "minimumDurationMinutes": 60},
+        {"city": "马德里", "nameZh": "太阳门广场和零公里地标", "nameEn": "Puerta del Sol and Kilometre Zero", "modes": ["walk"], "minimumDurationMinutes": 15},
+        {"city": "马德里", "nameZh": "马约尔广场", "nameEn": "Plaza Mayor, Madrid", "modes": ["walk"], "minimumDurationMinutes": 15},
+        {"city": "马德里", "nameZh": "伯纳乌球场", "nameEn": "Santiago Bernabeu Stadium", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "萨拉戈萨", "nameZh": "萨拉戈萨城区", "nameEn": "Zaragoza", "modes": ["walk"], "minimumDurationMinutes": 15},
+        {"city": "萨拉戈萨", "nameZh": "皮拉尔圣母基督大教堂", "nameEn": "Basilica of Our Lady of the Pillar", "modes": ["outside"], "minimumDurationMinutes": 15}
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2026-10-01",
+      "weekday": "星期四",
+      "route": ["萨拉戈萨", "巴塞罗那"],
+      "transport": ["coach"],
+      "segments": [
+        {"from": "萨拉戈萨", "to": "巴塞罗那", "mode": "coach", "distanceKm": 325, "duration": null, "reference": "原文：大巴约325公里"}
+      ],
+      "visits": [
+        {"city": "巴塞罗那", "nameZh": "国家宫", "nameEn": "Palau Nacional", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "巴塞罗那", "nameZh": "哥伦布广场纪念碑", "nameEn": "Columbus Monument, Barcelona", "modes": ["walk"], "minimumDurationMinutes": 15},
+        {"city": "巴塞罗那", "nameZh": "米拉之家", "nameEn": "Casa Mila", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "巴塞罗那", "nameZh": "巴特罗之家", "nameEn": "Casa Batllo", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "巴塞罗那", "nameZh": "感恩大道", "nameEn": "Passeig de Gracia", "modes": ["walk", "shopping"], "minimumDurationMinutes": 90}
+      ]
+    },
+    {
+      "day": 4,
+      "date": "2026-10-02",
+      "weekday": "星期五",
+      "route": ["巴塞罗那"],
+      "transport": ["coach"],
+      "segments": [],
+      "visits": [
+        {"city": "巴塞罗那", "nameZh": "圣家族大教堂", "nameEn": "Sagrada Familia", "modes": ["inside", "guided"], "minimumDurationMinutes": 60},
+        {"city": "巴塞罗那", "nameZh": "奎尔公园", "nameEn": "Park Guell", "modes": ["inside", "guided"], "minimumDurationMinutes": 60},
+        {"city": "巴塞罗那", "nameZh": "La Roca购物村", "nameEn": "La Roca Village", "modes": ["shopping", "free_time"], "minimumDurationMinutes": 150},
+        {"city": "巴塞罗那", "nameZh": "西班牙海鲜饭", "nameEn": "Spanish paella", "modes": ["food"], "minimumDurationMinutes": null}
+      ]
+    },
+    {
+      "day": 5,
+      "date": "2026-10-03",
+      "weekday": "星期六",
+      "route": ["巴塞罗那", "塔拉戈纳", "佩尼斯科拉", "瓦伦西亚"],
+      "transport": ["coach"],
+      "segments": [
+        {"from": "巴塞罗那", "to": "塔拉戈纳", "mode": "coach", "distanceKm": 98, "duration": null, "reference": "原文：大巴约98公里"},
+        {"from": "塔拉戈纳", "to": "佩尼斯科拉", "mode": "coach", "distanceKm": 130, "duration": null, "reference": "原文：大巴约130公里"},
+        {"from": "佩尼斯科拉", "to": "瓦伦西亚", "mode": "coach", "distanceKm": 170, "duration": null, "reference": "原文：大巴约170公里"}
+      ],
+      "visits": [
+        {"city": "塔拉戈纳", "nameZh": "塔拉戈纳地中海观景台", "nameEn": "Balcony of the Mediterranean", "modes": ["walk"], "minimumDurationMinutes": 15},
+        {"city": "塔拉戈纳", "nameZh": "塔拉戈纳圆形剧场", "nameEn": "Tarragona Amphitheatre", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "佩尼斯科拉", "nameZh": "佩尼斯科拉城区", "nameEn": "Peniscola", "modes": ["walk"], "minimumDurationMinutes": 30},
+        {"city": "瓦伦西亚", "nameZh": "塞拉诺双塔", "nameEn": "Serranos Towers", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "瓦伦西亚", "nameZh": "瓦伦西亚主教堂和塔楼", "nameEn": "Valencia Cathedral and Miguelete Tower", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "瓦伦西亚", "nameZh": "圣女广场", "nameEn": "Plaza de la Virgen", "modes": ["walk"], "minimumDurationMinutes": 15},
+        {"city": "瓦伦西亚", "nameZh": "科学艺术城", "nameEn": "City of Arts and Sciences", "modes": ["outside"], "minimumDurationMinutes": 15}
+      ]
+    },
+    {
+      "day": 6,
+      "date": "2026-10-04",
+      "weekday": "星期日",
+      "route": ["瓦伦西亚", "格拉纳达"],
+      "transport": ["coach"],
+      "segments": [
+        {"from": "瓦伦西亚", "to": "格拉纳达", "mode": "coach", "distanceKm": 500, "duration": null, "reference": "原文：大巴约500公里"}
+      ],
+      "visits": [
+        {"city": "格拉纳达", "nameZh": "阿尔罕布拉宫", "nameEn": "Alhambra", "modes": ["inside", "guided"], "minimumDurationMinutes": 90, "reservationRequired": true},
+        {"city": "格拉纳达", "nameZh": "阿宫后花园", "nameEn": "Generalife", "modes": ["inside", "conditional"], "minimumDurationMinutes": null, "condition": "阿尔罕布拉宫预约未获批时的替代方案之一"},
+        {"city": "塞维利亚", "nameZh": "塞维利亚王宫", "nameEn": "Royal Alcazar of Seville", "modes": ["inside", "conditional"], "minimumDurationMinutes": null, "condition": "阿尔罕布拉宫预约未获批时的替代方案之一"},
+        {"city": "格拉纳达", "nameZh": "阿尔拜辛区", "nameEn": "Albaicin", "modes": ["free_time", "conditional"], "minimumDurationMinutes": 30, "condition": "阿尔罕布拉宫预约未获批时追加"}
+      ]
+    },
+    {
+      "day": 7,
+      "date": "2026-10-05",
+      "weekday": "星期一",
+      "route": ["格拉纳达", "米哈斯", "龙达", "塞维利亚"],
+      "transport": ["coach"],
+      "segments": [
+        {"from": "格拉纳达", "to": "米哈斯", "mode": "coach", "distanceKm": 155, "duration": null, "reference": "原文：大巴约155公里"},
+        {"from": "米哈斯", "to": "龙达", "mode": "coach", "distanceKm": 94, "duration": null, "reference": "原文：大巴约94公里"},
+        {"from": "龙达", "to": "塞维利亚", "mode": "coach", "distanceKm": 130, "duration": null, "reference": "原文：大巴约130公里"}
+      ],
+      "visits": [
+        {"city": "米哈斯", "nameZh": "米哈斯城区", "nameEn": "Mijas Pueblo", "modes": ["walk"], "minimumDurationMinutes": 60},
+        {"city": "龙达", "nameZh": "龙达城区、天然断崖与新桥", "nameEn": "Ronda and Puente Nuevo", "modes": ["walk", "guided"], "minimumDurationMinutes": 60},
+        {"city": "龙达", "nameZh": "龙达斗牛场", "nameEn": "Plaza de Toros de Ronda", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "塞维利亚", "nameZh": "佛朗明戈表演", "nameEn": "Flamenco show", "modes": ["show", "inside"], "minimumDurationMinutes": 60, "notes": "含1杯饮料；原文未给出具体场馆，按当日终点归入塞维利亚。"}
+      ]
+    },
+    {
+      "day": 8,
+      "date": "2026-10-06",
+      "weekday": "星期二",
+      "route": ["塞维利亚", "埃武拉"],
+      "transport": ["coach"],
+      "segments": [
+        {"from": "塞维利亚", "to": "埃武拉", "mode": "coach", "distanceKm": 325, "duration": null, "reference": "原文：大巴约325公里"}
+      ],
+      "visits": [
+        {"city": "塞维利亚", "nameZh": "塞维利亚西班牙广场", "nameEn": "Plaza de Espana, Seville", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "塞维利亚", "nameZh": "塞维利亚大王宫", "nameEn": "Royal Alcazar of Seville", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "塞维利亚", "nameZh": "塞维利亚大教堂", "nameEn": "Seville Cathedral", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "塞维利亚", "nameZh": "黄金塔", "nameEn": "Torre del Oro", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "塞维利亚", "nameZh": "塞维利亚圆形竞技场", "nameEn": "Plaza de Toros de la Maestranza", "modes": ["outside"], "minimumDurationMinutes": 5},
+        {"city": "埃武拉", "nameZh": "埃武拉城区", "nameEn": "Historic Centre of Evora", "modes": ["walk"], "minimumDurationMinutes": null},
+        {"city": "埃武拉", "nameZh": "埃武拉罗马神庙", "nameEn": "Roman Temple of Evora", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "埃武拉", "nameZh": "埃武拉大教堂", "nameEn": "Cathedral of Evora", "modes": ["outside"], "minimumDurationMinutes": 15}
+      ]
+    },
+    {
+      "day": 9,
+      "date": "2026-10-07",
+      "weekday": "星期三",
+      "route": ["埃武拉", "罗卡角", "里斯本"],
+      "transport": ["coach"],
+      "segments": [
+        {"from": "埃武拉", "to": "罗卡角", "mode": "coach", "distanceKm": 166, "duration": null, "reference": "原文：大巴约166公里"},
+        {"from": "罗卡角", "to": "里斯本", "mode": "coach", "distanceKm": 40, "duration": null, "reference": "原文：大巴约40公里"}
+      ],
+      "visits": [
+        {"city": "罗卡角", "nameZh": "罗卡角与经纬度纪念碑", "nameEn": "Cabo da Roca", "modes": ["walk"], "minimumDurationMinutes": 30},
+        {"city": "里斯本", "nameZh": "贝伦塔", "nameEn": "Belem Tower", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "里斯本", "nameZh": "航海发现纪念碑", "nameEn": "Monument to the Discoveries", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "里斯本", "nameZh": "圣热罗尼姆修道院和教堂", "nameEn": "Jeronimos Monastery", "modes": ["outside"], "minimumDurationMinutes": 15},
+        {"city": "里斯本", "nameZh": "4月25日大桥", "nameEn": "25 de Abril Bridge", "modes": ["distant"], "minimumDurationMinutes": 5},
+        {"city": "里斯本", "nameZh": "罗西奥广场", "nameEn": "Rossio Square", "modes": ["walk"], "minimumDurationMinutes": 15},
+        {"city": "里斯本", "nameZh": "自由大道", "nameEn": "Avenida da Liberdade", "modes": ["walk", "shopping"], "minimumDurationMinutes": 90},
+        {"city": "里斯本", "nameZh": "百年老店葡式蛋挞", "nameEn": "Pasteis de Belem", "modes": ["food"], "minimumDurationMinutes": null},
+        {"city": "里斯本", "nameZh": "葡萄牙鳕鱼餐", "nameEn": "Portuguese bacalhau meal", "modes": ["food"], "minimumDurationMinutes": null}
+      ]
+    },
+    {
+      "day": 10,
+      "date": "2026-10-08",
+      "weekday": "星期四",
+      "route": ["里斯本", "杭州"],
+      "transport": ["flight"],
+      "segments": [
+        {"from": "里斯本", "to": "杭州", "mode": "flight", "distanceKm": null, "duration": "约13小时15分", "reference": "JD622 11:55-08:10+1（当地时间）"}
+      ],
+      "visits": []
+    },
+    {
+      "day": 11,
+      "date": "2026-10-09",
+      "weekday": "星期五",
+      "route": ["杭州"],
+      "transport": [],
+      "segments": [],
+      "visits": [],
+      "notes": ["抵达杭州；按行程单要求配合办理回程销签确认。"]
+    }
+  ],
+  "extractionNotes": [
+    "PDF注明城市间公里数为直线距离，仅供参考；大巴耗时未在原文给出，当前保留为null，后续地图阶段再按道路路线计算。",
+    "未出现‘入内/外观/远观’字样但明确给出游览时长的开放空间，统一标为walk，不擅自推断购票入内。",
+    "杭州作为起点和终点在routeNodes中分别保留，便于地图绘制闭合路线。",
+    "La Roca购物村是购物点，不作为路线城市红点；阿尔罕布拉宫替代项目不作为默认路线蓝点。"
+  ]
+}

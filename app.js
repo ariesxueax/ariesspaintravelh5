@@ -1,0 +1,227 @@
+(async function () {
+  const C = window.ROADBOOK_CONTENT;
+  const app = document.getElementById("app");
+  const topbar = document.getElementById("topbar");
+  const tabbar = document.getElementById("tabbar");
+  const sheet = document.getElementById("detailSheet");
+  const sheetContent = document.getElementById("sheetContent");
+  const mapboxToken = "pk.eyJ1IjoiYXJpZXN4dWVheDAwMSIsImEiOiJjbGgwMWl4c3Iwb3hkM2dxaHdld2EzMWUwIn0.PKltadPPKCz58RJ0epj0cw";
+  const itinerary = await fetch("data/itinerary-extraction.json").then(response => {
+    if (!response.ok) throw new Error("行程数据加载失败");
+    return response.json();
+  });
+
+  const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
+  const tabItems = [
+    ["home", "house", "首页"], ["itinerary", "calendar-days", "行程"], ["map", "map", "地图"], ["cities", "landmark", "城市"], ["checklist", "list-checks", "清单"]
+  ];
+  const checkSections = {
+    "行前": ["护照、身份证与签证材料分开放置", "国际段建议提前 3 小时抵达机场", "移动电源与备用锂电池必须随身携带", "返程跨日抵达杭州，预留次日休整时间"],
+    "必备物品": ["内衣、内裤、袜子 ×7", "睡衣 1 套、拖鞋", "钱包、零钱袋、锁封袋", "烧水杯、泡腾片、转换插头", "垃圾袋、雨衣或雨伞", "过敏药、止泻药、退烧药、晕车药", "湿纸巾、洗脸巾、化妆棉、卫生巾", "洗护用品、防晒、帽子", "U 盘、3C 认证充电宝、数据线", "充电头、Pocket、耳机", "墨镜、零食、现金"],
+    "应用": ["Google Maps：步行、餐厅与公交查询", "Google Translate：离线下载西班牙语、葡萄牙语", "WhatsApp：酒店与当地联络", "Uber / Bolt：城市内叫车备用", "XE Currency：欧元汇率与消费换算"],
+    "当地注意": ["餐厅晚餐时间普遍较晚，热门地点建议提前订位", "教堂与宫殿依现场规定着装，避免露肩与过短下装", "热门景区与地铁站留意随身包，不在街边外露证件", "西葡插座常见 C / F 型，准备欧标转换头", "水和公厕不一定随处免费，备少量硬币更方便"]
+  };
+  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null };
+  const savedChecks = JSON.parse(localStorage.getItem("iberia.mobile.checks") || "{}");
+  const allVisits = itinerary.days.flatMap(day => day.visits.filter(visit => !visit.modes.includes("conditional")).map(visit => ({ ...visit, day: day.day, date: day.date })));
+  const cityOrder = itinerary.routeNodes.map(node => node.nameZh).filter((city, index, list) => C.cities[city] && list.indexOf(city) === index);
+  const cityVisits = city => allVisits.filter(visit => visit.city === city);
+
+  function esc(value) {
+    return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+  }
+
+  function imageFor(name, city) {
+    const profile = C.cities[city];
+    return `assets/images/${C.imageKeys[name] || profile?.image || "cover"}.jpg`;
+  }
+
+  function modeTags(modes = []) {
+    return modes.filter(mode => modeLabels[mode]).map(mode => `<span class="mode-tag ${mode}">${modeLabels[mode]}</span>`).join("");
+  }
+
+  function coachText(segment) {
+    if (segment.mode !== "coach") return segment.duration || "国际航班";
+    const hours = Math.round(segment.distanceKm / 75 * 2) / 2;
+    return `${segment.distanceKm} km · 约 ${hours.toFixed(1)} 小时`;
+  }
+
+  function cityNameForRoute(day) {
+    return day.route.filter(city => city !== "杭州").join(" · ") || "杭州";
+  }
+
+  function topbarMarkup() {
+    if (state.view === "city") {
+      return `<button class="city-back" data-action="back-cities" aria-label="返回城市"><i data-lucide="arrow-left"></i></button><button class="brand-button" data-view="home"><b>${esc(state.city)}</b><span>城市导览</span></button><button class="top-action" data-view="map" aria-label="打开地图"><i data-lucide="map"></i></button>`;
+    }
+    return `<button class="brand-button" data-view="home"><b>伊比利亚光影纪行</b><span>西班牙 · 葡萄牙 11 天</span></button><button class="top-action" data-view="checklist" aria-label="打开旅行清单"><i data-lucide="list-checks"></i></button>`;
+  }
+
+  function tabbarMarkup() {
+    return tabItems.map(([view, icon, label]) => `<button class="tab-button ${state.view === view ? "active" : ""}" data-view="${view}" aria-label="${label}"><i data-lucide="${icon}"></i><span>${label}</span></button>`).join("");
+  }
+
+  function homeView() {
+    const day = itinerary.days.find(item => item.day === state.selectedDay) || itinerary.days[1];
+    const dayVisits = day.visits.filter(visit => !visit.modes.includes("conditional"));
+    const routeStops = itinerary.routeNodes.filter(node => node.nameZh !== "杭州").slice(0, 8);
+    const coachSegments = day.segments.filter(segment => segment.mode === "coach");
+    const coachDistance = coachSegments.reduce((sum, segment) => sum + segment.distanceKm, 0);
+    const transportSummary = day.segments.length
+      ? day.segments.map(segment => `<span><i data-lucide="${segment.mode === "flight" ? "plane" : "bus"}"></i>${esc(segment.from)} → ${esc(segment.to)} · ${coachText(segment)}</span>`).join("")
+      : `<span><i data-lucide="${day.transport.includes("flight") ? "plane" : "hotel"}"></i>${esc(day.notes?.[0] || "市内游览与休整")}</span>`;
+    return `<section class="view home-view">
+      <section class="hero">
+        <img class="hero-image" src="assets/images/cover.jpg" alt="西班牙葡萄牙旅行风景">
+        <div class="hero-content">
+          <div class="eyebrow">29 SEP — 09 OCT 2026</div>
+          <h1>伊比利亚<br>光影纪行</h1>
+          <p>从马德里的王室尺度，穿过高迪的曲线与安达卢西亚白墙，抵达大西洋尽头。</p>
+          <div class="hero-actions"><button class="primary-button" data-view="itinerary"><i data-lucide="calendar-days"></i>查看全程</button><button class="secondary-button" data-view="map"><i data-lucide="map"></i>路线地图</button></div>
+        </div>
+      </section>
+      <div class="trip-strip"><div><strong>11</strong><span>旅行天数</span></div><div><strong>12</strong><span>途经城市</span></div><div><strong>2</strong><span>目的国家</span></div></div>
+      <div class="journey-intro"><b>一条从王宫走向大西洋的环线</b><p>高迪建筑巡礼、世界遗产宫城、安达卢西亚白色小镇与葡萄牙大航海记忆，均已按日程放入可点开的移动卡片。</p></div>
+      <div class="section-head page-pad"><h2>选择行程日</h2><button class="text-button" data-view="itinerary">全部行程 <i data-lucide="arrow-right"></i></button></div>
+      <div class="day-scroller">${itinerary.days.map(item => `<button class="day-pill ${item.day === day.day ? "active" : ""}" data-select-day="${item.day}"><b>D${item.day}</b><span>${item.date.slice(5).replace("-", "/")}</span></button>`).join("")}</div>
+      <section class="day-journey"><div class="day-journey-head"><div><span>D${day.day} · ${day.weekday}</span><b>${esc(cityNameForRoute(day))}</b></div><em>${coachDistance ? `${coachDistance} km` : day.transport.includes("flight") ? "飞行日" : "市内游览"}</em></div><div class="day-route-string">${day.route.map(stop => `<strong>${esc(stop)}</strong>`).join(`<i data-lucide="chevron-right"></i>`)}</div><div class="transport-summary">${transportSummary}</div></section>
+      <section class="day-attractions"><div class="section-head"><div><div class="eyebrow">Today stops</div><h2>${dayVisits.length ? "今日景点" : "今日安排"}</h2></div><span class="attraction-count">${dayVisits.length ? `${dayVisits.length} 个节点` : "抵达日"}</span></div>${dayVisits.length ? `<div class="attraction-scroller">${dayVisits.map((visit, index) => attractionCard(visit, index + 1)).join("")}</div>` : `<div class="transit-card"><i data-lucide="plane"></i><div><b>${esc(day.notes?.[0] || "行程转场")}</b><span>留出充足时间办理值机与休整，详细提醒见旅行清单。</span></div></div>`}</section>
+      <section class="mini-route"><div class="eyebrow">Route line</div><div class="route-rail">${routeStops.map(stop => `<div class="route-stop"><i></i><strong>${esc(stop.nameZh)}</strong></div>`).join("")}</div></section>
+    </section>`;
+  }
+
+  function attractionCard(visit, index) {
+    const image = imageFor(visit.nameZh, visit.city);
+    const duration = visit.minimumDurationMinutes ? `${visit.minimumDurationMinutes} 分钟` : "团队节奏";
+    return `<button class="attraction-card" data-spot="${esc(visit.nameZh)}" data-city="${esc(visit.city)}"><img src="${image}" alt="${esc(visit.nameZh)}" onerror="this.src='assets/images/${C.cities[visit.city]?.image || "cover"}.jpg'"><span class="attraction-index">${String(index).padStart(2, "0")}</span><div class="attraction-body"><small>${esc(visit.city)} · ${duration}</small><b>${esc(visit.nameZh)}</b><div class="mode-row">${modeTags(visit.modes)}</div></div></button>`;
+  }
+
+  function itineraryView() {
+    return `<section class="view itinerary-view"><header class="itinerary-header"><div class="eyebrow">Day by day</div><h1>每日行程</h1><p>把每天的移动、停留和城市节奏，放在一条连续路线里阅读。</p><div class="itinerary-stats"><span>11 天</span><span>12 城</span><span>44 个节点</span></div></header><div class="itinerary-flow">${itinerary.days.map(day => dayCard(day)).join("")}</div></section>`;
+  }
+
+  function dayCard(day) {
+    const visits = day.visits.filter(visit => !visit.modes.includes("conditional"));
+    const coachSegments = day.segments.filter(segment => segment.mode === "coach");
+    const distance = coachSegments.reduce((sum, segment) => sum + segment.distanceKm, 0);
+    const segmentMarkup = day.segments.map(segment => `<div class="flow-travel"><i data-lucide="${segment.mode === "flight" ? "plane" : "bus"}"></i><span>${esc(segment.from)} → ${esc(segment.to)}</span><b>${coachText(segment)}</b></div>`).join("");
+    const metrics = distance ? `${distance} km` : day.transport.includes("flight") ? "飞行日" : visits.length ? `${visits.length} 个停留` : "抵达日";
+    return `<section class="day-flow"><header class="day-flow-head"><span class="flow-day">D${String(day.day).padStart(2, "0")}</span><div><small>${day.date} · ${day.weekday}</small><b>${esc(cityNameForRoute(day))}</b></div><em>${metrics}</em></header><div class="day-flow-body">${segmentMarkup}${visits.length ? `<div class="flow-stops">${visits.map((visit, index) => flowStop(visit, index + 1)).join("")}</div>` : `<div class="flow-note"><i data-lucide="${day.transport.includes("flight") ? "plane" : "bed-double"}"></i><span>${esc(day.notes?.[0] || "酒店休整与行前准备")}</span></div>`}</div></section>`;
+  }
+
+  function flowStop(visit, index) {
+    const duration = visit.minimumDurationMinutes ? `建议 ${visit.minimumDurationMinutes} 分钟` : "跟随团队节奏";
+    return `<button class="flow-stop" data-spot="${esc(visit.nameZh)}" data-city="${esc(visit.city)}"><span class="flow-stop-number">${String(index).padStart(2, "0")}</span><span class="flow-stop-content"><small>${esc(visit.city)} · ${duration}</small><b>${esc(visit.nameZh)}</b><span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`;
+  }
+
+  function mapView() {
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(segment => `${segment.distanceKm} km`).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
+  }
+
+  function citiesView() {
+    return `<section class="view cities-view"><header class="cities-header"><div class="eyebrow">City guide</div><h1>城市导览</h1><p>从城市文化入门，再进入当天路线、美食与周边建议。</p></header><div class="city-stack">${cityOrder.map(city => cityCard(city)).join("")}</div></section>`;
+  }
+
+  function cityCard(city) {
+    const profile = C.cities[city];
+    return `<button class="city-card" data-city-page="${esc(city)}"><img src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><span class="city-arrow"><i data-lucide="arrow-up-right"></i></span><div class="city-card-body"><small>${esc(profile.days)} · ${esc(profile.country)}</small><h2>${esc(city)}</h2><p>${esc(profile.culture)}</p></div></button>`;
+  }
+
+  function cityView(city) {
+    const profile = C.cities[city];
+    const visits = cityVisits(city);
+    return `<section class="view city-detail"><section class="city-hero"><img src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}</h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><p class="culture-copy">${esc(profile.culture)}</p><div class="guide-card"><h3>${esc(profile.guide.title)}</h3><p><b>这样走：</b>${esc(profile.guide.route)}</p><p><b>怎么拍：</b>${esc(profile.guide.photo)}</p><p><b>时间有限：</b>${esc(profile.guide.quick)}</p></div><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name">${esc(visit.nameZh)}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc)).join("")}</div></section></section>`;
+  }
+
+  function foodCard(name, desc) {
+    const icon = /市场|市集|街|区/.test(name) ? "store" : /伴手礼|糖|巧克力|瓷|香水|软木|陶|橄榄油|罐头|花砖/.test(name) ? "shopping-bag" : "utensils";
+    return `<div class="food-card"><span class="food-kind"><i data-lucide="${icon}"></i></span><div><b>${esc(name)}</b><span>${esc(desc)}</span></div></div>`;
+  }
+
+  function checklistView() {
+    const active = state.checklist;
+    const rows = checkSections[active].map((item, index) => {
+      const id = `${active}-${index}`;
+      return `<label class="check-row ${savedChecks[id] ? "done" : ""}"><input type="checkbox" data-check="${esc(id)}" ${savedChecks[id] ? "checked" : ""}><span>${esc(item)}</span></label>`;
+    }).join("");
+    return `<section class="view checklist-view"><header class="checklist-header"><div class="eyebrow">Ready to go</div><h1>旅行清单</h1><p>勾选会保留在当前设备，出发前可随时核对。</p></header><div class="checklist-tabs">${Object.keys(checkSections).map(name => `<button class="check-tab ${active === name ? "active" : ""}" data-check-section="${name}">${name}</button>`).join("")}</div><div class="check-panel">${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/29 00:30 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div></div></section>`;
+  }
+
+  function openSpot(name, city) {
+    const visit = cityVisits(city).find(item => item.nameZh === name) || allVisits.find(item => item.nameZh === name);
+    const profile = C.cities[city];
+    const photo = imageFor(name, city);
+    const duration = visit?.minimumDurationMinutes ? `${visit.minimumDurationMinutes} 分钟` : "跟随团队";
+    sheetContent.innerHTML = `<section class="sheet-hero"><img src="${photo}" alt="${esc(name)}" onerror="this.src='assets/images/${profile?.image || "cover"}.jpg'"><h2>${esc(name)}</h2></section><section class="sheet-body"><div class="tag-row">${modeTags(visit?.modes || [])}</div><div class="spot-facts"><div><b>${esc(city)}</b><span>所在城市</span></div><div><b>${duration}</b><span>建议停留</span></div><div><b>${visit?.modes.includes("inside") ? "含门票" : "按行程"}</b><span>参观方式</span></div></div><h3>30 秒速览</h3><p>${esc(profile?.guide?.history || `${name}是本行程的重要停留节点。`)}</p><h3>在现场这样看</h3><p>${esc(profile?.guide?.route || "先观察整体空间，再把注意力放在建筑的材质、光线与人流交汇处。")}</p><h3>拍照与节奏</h3><p>${esc(profile?.guide?.photo || "避开正门人流，选择侧面光线与更低的机位，先看十秒再按快门。")}</p><button class="sheet-map-link" data-map-spot="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></section>`;
+    sheet.showModal();
+    refreshIcons();
+  }
+
+  function initializeMap() {
+    const mapContainer = document.getElementById("mobileMap");
+    if (!mapContainer || !window.mapboxgl || state.map) return;
+    window.mapboxgl.accessToken = mapboxToken;
+    const cityNames = itinerary.routeNodes.map(node => node.nameZh).filter((name, index, list) => C.cityCoordinates[name] && list.indexOf(name) === index);
+    const coordinates = cityNames.map(name => C.cityCoordinates[name]);
+    state.map = new mapboxgl.Map({ container: "mobileMap", style: "mapbox://styles/mapbox/light-v11", center: [-4.5, 39.3], zoom: 4.35, attributionControl: false });
+    state.map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
+    state.map.on("load", () => {
+      state.map.addSource("mobile-route", { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates } } });
+      state.map.addLayer({ id: "mobile-route-line", type: "line", source: "mobile-route", paint: { "line-color": "#c85b4d", "line-width": 3, "line-opacity": .85 } });
+      cityNames.forEach(name => marker(name, C.cityCoordinates[name], "city-marker", name));
+      allVisits.filter(visit => C.poiCoordinates[visit.nameZh]).forEach(visit => marker(visit.nameZh, C.poiCoordinates[visit.nameZh], "poi-marker", visit.city));
+      const bounds = coordinates.reduce((value, coordinate) => value.extend(coordinate), new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+      state.map.fitBounds(bounds, { padding: 38, duration: 0 });
+    });
+  }
+
+  function marker(name, coordinates, className, subtitle) {
+    const element = document.createElement("button");
+    element.className = className;
+    element.setAttribute("aria-label", name);
+    if (className === "city-marker") element.innerHTML = `<span>${esc(name)}</span>`;
+    element.style.cssText = `width:${className === "city-marker" ? 14 : 10}px;height:${className === "city-marker" ? 14 : 10}px;border:2px solid #fff;border-radius:50%;background:${className === "city-marker" ? "#c85b4d" : "#2d6f91"};box-shadow:0 1px 5px rgba(0,0,0,.28);padding:0;`;
+    new mapboxgl.Marker({ element }).setLngLat(coordinates).setPopup(new mapboxgl.Popup({ offset: 14 }).setHTML(`<b>${esc(name)}</b><span>${esc(subtitle)}</span>`)).addTo(state.map);
+  }
+
+  function render() {
+    if (state.map && state.view !== "map") { state.map.remove(); state.map = null; }
+    topbar.innerHTML = topbarMarkup();
+    tabbar.innerHTML = tabbarMarkup();
+    app.innerHTML = state.view === "home" ? homeView() : state.view === "itinerary" ? itineraryView() : state.view === "map" ? mapView() : state.view === "cities" ? citiesView() : state.view === "city" ? cityView(state.city) : checklistView();
+    refreshIcons();
+    window.scrollTo({ top: 0, behavior: "instant" });
+    if (state.view === "map") window.setTimeout(initializeMap, 0);
+  }
+
+  function refreshIcons() {
+    if (window.lucide) window.lucide.createIcons({ attrs: { "stroke-width": 1.8 } });
+  }
+
+  document.addEventListener("click", event => {
+    const viewButton = event.target.closest("[data-view]");
+    if (viewButton) { state.view = viewButton.dataset.view; state.city = null; render(); return; }
+    const dayButton = event.target.closest("[data-select-day]");
+    if (dayButton) { state.selectedDay = Number(dayButton.dataset.selectDay); render(); return; }
+    const cityButton = event.target.closest("[data-city-page]");
+    if (cityButton) { state.city = cityButton.dataset.cityPage; state.view = "city"; render(); return; }
+    const spotButton = event.target.closest("[data-spot]");
+    if (spotButton) { openSpot(spotButton.dataset.spot, spotButton.dataset.city); return; }
+    const sectionButton = event.target.closest("[data-check-section]");
+    if (sectionButton) { state.checklist = sectionButton.dataset.checkSection; render(); return; }
+    if (event.target.closest("[data-action='back-cities']")) { state.view = "cities"; state.city = null; render(); return; }
+    if (event.target.closest("[data-close-sheet]")) { sheet.close(); return; }
+    const mapSpot = event.target.closest("[data-map-spot]");
+    if (mapSpot) { sheet.close(); state.view = "map"; render(); window.setTimeout(() => state.map?.flyTo({ center: C.poiCoordinates[mapSpot.dataset.mapSpot] || C.cityCoordinates[mapSpot.dataset.city], zoom: 14 }), 700); }
+  });
+
+  document.addEventListener("change", event => {
+    const checkbox = event.target.closest("[data-check]");
+    if (!checkbox) return;
+    savedChecks[checkbox.dataset.check] = checkbox.checked;
+    localStorage.setItem("iberia.mobile.checks", JSON.stringify(savedChecks));
+    checkbox.closest("label").classList.toggle("done", checkbox.checked);
+  });
+
+  render();
+})();
