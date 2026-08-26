@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Life in Travel logo</title>
+  <desc id="desc">An open circular route rising toward a leaf and sunrise, representing a life enriched by travel.</desc>
+  <defs>
+    <linearGradient id="route" x1="276" y1="930" x2="865" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#087E8B"/>
+      <stop offset=".56" stop-color="#12A58E"/>
+      <stop offset="1" stop-color="#79C843"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="730" y1="320" x2="966" y2="157" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#52B947"/>
+      <stop offset="1" stop-color="#B8D943"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rising sun: the promise of each new destination. -->
+  <circle cx="860" cy="298" r="88" fill="#FFB33D"/>
+
+  <!-- An open orbit makes a compass-like journey without enclosing the path. -->
+  <path d="M903 196C812 118 683 82 550 115C318 172 166 407 203 646C239 881 450 1056 688 1044C794 1039 889 997 960 933"
+        fill="none" stroke="#087E8B" stroke-width="78" stroke-linecap="round"/>
+
+  <!-- Travel route, growing as it ascends. -->
+  <path d="M306 850C381 888 481 888 559 836C640 782 642 695 627 613C612 530 641 463 707 424C758 394 802 374 832 334"
+        fill="none" stroke="url(#route)" stroke-width="82" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Waypoint, the small moments that make the route meaningful. -->
+  <circle cx="628" cy="612" r="25" fill="#FFF"/>
+
+  <!-- The route resolves into a living leaf. -->
+  <path d="M805 385C811 276 894 195 1000 181C1002 294 928 380 818 400C812 401 807 394 805 385Z" fill="url(#leaf)"/>
+  <path d="M826 374C869 328 911 283 968 218" fill="none" stroke="#FFF" stroke-opacity=".82" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- Three light route marks add movement without relying on text. -->
+  <path d="M247 753L308 768M236 662L299 672M248 570L307 566" fill="none" stroke="#FF6B4A" stroke-width="24" stroke-linecap="round"/>
+</svg>
