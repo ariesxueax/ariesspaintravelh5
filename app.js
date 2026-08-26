@@ -9,6 +9,16 @@
   const imageLightboxImage = document.getElementById("imageLightboxImage");
   const imageLightboxCaption = document.getElementById("imageLightboxCaption");
   const mapboxToken = "pk.eyJ1IjoiYXJpZXN4dWVheDAwMSIsImEiOiJjbGgwMWl4c3Iwb3hkM2dxaHdld2EzMWUwIn0.PKltadPPKCz58RJ0epj0cw";
+  const imageAssetKeys = new Set([
+    "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
+  ]);
+  const preloadScreen = document.getElementById("preloadScreen");
+  const preloadProgress = document.getElementById("preloadProgress");
+  const imagePreloadPromise = preloadAllImages();
+  const previewGate = Promise.race([
+    imagePreloadPromise.then(() => "complete"),
+    new Promise(resolve => window.setTimeout(() => resolve("timeout"), 3000))
+  ]);
   const itinerary = await fetch("data/itinerary-extraction.json").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
@@ -29,9 +39,6 @@
   const allVisits = itinerary.days.flatMap(day => day.visits.filter(visit => !visit.modes.includes("conditional")).map(visit => ({ ...visit, day: day.day, date: day.date })));
   const cityOrder = itinerary.routeNodes.map(node => node.nameZh).filter((city, index, list) => C.cities[city] && list.indexOf(city) === index);
   const cityVisits = city => allVisits.filter(visit => visit.city === city);
-  const imageAssetKeys = new Set([
-    "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
-  ]);
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
@@ -45,32 +52,44 @@
     return `assets/images/${key}.jpg`;
   }
 
-  function scheduleImagePreload() {
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType)) return;
+  function preloadAllImages() {
+    const urls = [...imageAssetKeys].map(key => `assets/images/${key}.jpg`);
+    const maxConcurrent = 6;
+    let nextIndex = 0;
+    let completed = 0;
+    preloadProgress.textContent = `0 / ${urls.length}`;
 
-    const selectedDay = itinerary.days.find(day => day.day === state.selectedDay);
-    const selectedDayImages = (selectedDay?.visits || []).filter(visit => !visit.modes.includes("conditional")).map(visit => imageFor(visit.nameZh, visit.city));
-    const cityImages = cityOrder.map(city => imageFor("", city));
-    const remainingSpotImages = allVisits.map(visit => imageFor(visit.nameZh, visit.city));
-    const queue = [...new Set([...selectedDayImages, ...cityImages, ...remainingSpotImages])].filter(url => !url.endsWith("/cover.jpg"));
+    return new Promise(resolve => {
+      const finishOne = () => {
+        completed += 1;
+        preloadProgress.textContent = `${completed} / ${urls.length}`;
+        if (completed === urls.length) {
+          resolve();
+          return;
+        }
+        loadNext();
+      };
 
-    const start = () => {
       const loadNext = () => {
-        const url = queue.shift();
+        const url = urls[nextIndex];
+        nextIndex += 1;
         if (!url) return;
         const image = new Image();
         image.decoding = "async";
-        if ("fetchPriority" in image) image.fetchPriority = "low";
-        image.onload = image.onerror = loadNext;
+        image.onload = finishOne;
+        image.onerror = finishOne;
         image.src = url;
       };
-      loadNext();
-      loadNext();
-    };
 
-    if ("requestIdleCallback" in window) window.requestIdleCallback(start, { timeout: 1800 });
-    else window.setTimeout(start, 1200);
+      for (let index = 0; index < Math.min(maxConcurrent, urls.length); index += 1) loadNext();
+    });
+  }
+
+  async function revealPreview() {
+    await previewGate;
+    preloadScreen.classList.add("is-hidden");
+    preloadScreen.setAttribute("aria-hidden", "true");
+    window.setTimeout(() => preloadScreen.remove(), 260);
   }
 
   function modeTags(modes = []) {
@@ -314,6 +333,6 @@
     checkbox.closest("label").classList.toggle("done", checkbox.checked);
   });
 
+  await revealPreview();
   render();
-  scheduleImagePreload();
 })();
