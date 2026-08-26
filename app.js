@@ -21,7 +21,7 @@
     "应用": ["Google Maps：步行、餐厅与公交查询", "Google Translate：离线下载西班牙语、葡萄牙语", "WhatsApp：酒店与当地联络", "Uber / Bolt：城市内叫车备用", "XE Currency：欧元汇率与消费换算"],
     "当地注意": ["餐厅晚餐时间普遍较晚，热门地点建议提前订位", "教堂与宫殿依现场规定着装，避免露肩与过短下装", "热门景区与地铁站留意随身包，不在街边外露证件", "西葡插座常见 C / F 型，准备欧标转换头", "水和公厕不一定随处免费，备少量硬币更方便"]
   };
-  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null };
+  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null, mapFocus: null };
   const savedChecks = JSON.parse(localStorage.getItem("iberia.mobile.checks") || "{}");
   const allVisits = itinerary.days.flatMap(day => day.visits.filter(visit => !visit.modes.includes("conditional")).map(visit => ({ ...visit, day: day.day, date: day.date })));
   const cityOrder = itinerary.routeNodes.map(node => node.nameZh).filter((city, index, list) => C.cities[city] && list.indexOf(city) === index);
@@ -119,7 +119,7 @@
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点，绿点为吃与带走；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#2f8a57"></i>吃与带走</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
   }
 
   function citiesView() {
@@ -135,12 +135,12 @@
     const profile = C.cities[city];
     const visits = cityVisits(city);
     const architecture = profile.architecture || { style: profile.culture, makers: "这座城市的风貌来自不同时代的建造者与日常生活的共同塑造。" };
-    return `<section class="view city-detail"><section class="city-hero"><img src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}</h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="guide-card"><h3>${esc(profile.guide.title)}</h3><p><b>这样走：</b>${esc(profile.guide.route)}</p><p><b>怎么拍：</b>${esc(profile.guide.photo)}</p><p><b>时间有限：</b>${esc(profile.guide.quick)}</p></div><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name">${esc(visit.nameZh)}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc)).join("")}</div></section></section>`;
+    return `<section class="view city-detail"><section class="city-hero"><img src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}</h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="guide-card"><h3>${esc(profile.guide.title)}</h3><p><b>这样走：</b>${esc(profile.guide.route)}</p><p><b>怎么拍：</b>${esc(profile.guide.photo)}</p><p><b>时间有限：</b>${esc(profile.guide.quick)}</p></div><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name">${esc(visit.nameZh)}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc, city)).join("")}</div></section></section>`;
   }
 
-  function foodCard(name, desc) {
+  function foodCard(name, desc, city) {
     const icon = /市场|市集|街|区/.test(name) ? "store" : /伴手礼|糖|巧克力|瓷|香水|软木|陶|橄榄油|罐头|花砖/.test(name) ? "shopping-bag" : "utensils";
-    return `<div class="food-card"><span class="food-kind"><i data-lucide="${icon}"></i></span><div><b>${esc(name)}</b><span>${esc(desc)}</span></div></div>`;
+    return `<article class="food-card"><span class="food-kind"><i data-lucide="${icon}"></i></span><div class="food-copy"><b>${esc(name)}</b><span>${esc(desc)}</span><button class="food-map-link" data-map-food="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></div></article>`;
   }
 
   function checklistView() {
@@ -175,8 +175,10 @@
       state.map.addLayer({ id: "mobile-route-line", type: "line", source: "mobile-route", paint: { "line-color": "#c85b4d", "line-width": 3, "line-opacity": .85 } });
       cityNames.forEach(name => marker(name, C.cityCoordinates[name], "city-marker", name));
       allVisits.filter(visit => C.poiCoordinates[visit.nameZh]).forEach(visit => marker(visit.nameZh, C.poiCoordinates[visit.nameZh], "poi-marker", visit.city));
+      Object.entries(C.foodCoordinates || {}).forEach(([name, place]) => marker(name, place.coordinates, "food-marker", place.city));
       const bounds = coordinates.reduce((value, coordinate) => value.extend(coordinate), new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
       state.map.fitBounds(bounds, { padding: 38, duration: 0 });
+      if (state.mapFocus) state.map.flyTo({ center: state.mapFocus, zoom: 14, duration: 700 });
     });
   }
 
@@ -185,7 +187,8 @@
     element.className = className;
     element.setAttribute("aria-label", name);
     if (className === "city-marker") element.innerHTML = `<span>${esc(name)}</span>`;
-    element.style.cssText = `width:${className === "city-marker" ? 14 : 10}px;height:${className === "city-marker" ? 14 : 10}px;border:2px solid #fff;border-radius:50%;background:${className === "city-marker" ? "#c85b4d" : "#2d6f91"};box-shadow:0 1px 5px rgba(0,0,0,.28);padding:0;`;
+    const color = className === "city-marker" ? "#c85b4d" : className === "food-marker" ? "#2f8a57" : "#2d6f91";
+    element.style.cssText = `width:${className === "city-marker" ? 14 : 10}px;height:${className === "city-marker" ? 14 : 10}px;border:2px solid #fff;border-radius:50%;background:${color};box-shadow:0 1px 5px rgba(0,0,0,.28);padding:0;`;
     new mapboxgl.Marker({ element }).setLngLat(coordinates).setPopup(new mapboxgl.Popup({ offset: 14 }).setHTML(`<b>${esc(name)}</b><span>${esc(subtitle)}</span>`)).addTo(state.map);
   }
 
@@ -205,7 +208,7 @@
 
   document.addEventListener("click", event => {
     const viewButton = event.target.closest("[data-view]");
-    if (viewButton) { state.view = viewButton.dataset.view; state.city = null; render(); return; }
+    if (viewButton) { state.view = viewButton.dataset.view; state.city = null; state.mapFocus = null; render(); return; }
     const dayButton = event.target.closest("[data-select-day]");
     if (dayButton) { state.selectedDay = Number(dayButton.dataset.selectDay); render(); return; }
     const cityButton = event.target.closest("[data-city-page]");
@@ -216,8 +219,10 @@
     if (sectionButton) { state.checklist = sectionButton.dataset.checkSection; render(); return; }
     if (event.target.closest("[data-action='back-cities']")) { state.view = "cities"; state.city = null; render(); return; }
     if (event.target.closest("[data-close-sheet]")) { sheet.close(); return; }
+    const mapFood = event.target.closest("[data-map-food]");
+    if (mapFood) { const place = C.foodCoordinates?.[mapFood.dataset.mapFood]; state.mapFocus = place?.coordinates || C.cityCoordinates[mapFood.dataset.city]; state.view = "map"; state.city = null; render(); return; }
     const mapSpot = event.target.closest("[data-map-spot]");
-    if (mapSpot) { sheet.close(); state.view = "map"; render(); window.setTimeout(() => state.map?.flyTo({ center: C.poiCoordinates[mapSpot.dataset.mapSpot] || C.cityCoordinates[mapSpot.dataset.city], zoom: 14 }), 700); }
+    if (mapSpot) { sheet.close(); state.mapFocus = C.poiCoordinates[mapSpot.dataset.mapSpot] || C.cityCoordinates[mapSpot.dataset.city]; state.view = "map"; render(); }
   });
 
   document.addEventListener("change", event => {
