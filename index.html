@@ -15,8 +15,14 @@
   <link rel="stylesheet" href="v7.0-overrides.css">
   <link rel="stylesheet" href="v7.1-overrides.css">
   <link rel="stylesheet" href="v7.2-overrides.css">
+  <link rel="stylesheet" href="v7.4-overrides.css">
 </head>
 <body>
+  <div class="preload-screen" id="preloadScreen" role="status" aria-live="polite" aria-label="正在加载旅行路书">
+    <div class="preload-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+    <p>正在装载旅行画册</p>
+    <b id="preloadProgress">0 / 48</b>
+  </div>
   <div class="mobile-shell">
     <header class="topbar" id="topbar"></header>
     <main id="app" aria-live="polite"></main>
