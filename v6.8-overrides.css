@@ -1,0 +1,56 @@
+/* City-guide cards foreground the two ways of reading each city's character. */
+.city-card {
+  min-height: 226px;
+}
+
+.city-card::after {
+  background: linear-gradient(180deg, rgba(3, 20, 18, .08) 14%, rgba(3, 20, 18, .9) 100%);
+}
+
+.city-card-body {
+  padding: 15px 16px 16px;
+}
+
+.city-card h2 {
+  margin: 5px 0 10px;
+}
+
+.city-highlights {
+  display: grid;
+  gap: 7px;
+  max-width: calc(100% - 8px);
+}
+
+.city-highlight {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.city-highlight b {
+  display: inline-flex;
+  align-items: center;
+  min-height: 21px;
+  padding: 2px 7px;
+  border-left: 2px solid #f0d1a2;
+  color: #f7d9a9;
+  background: rgba(8, 31, 28, .44);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.city-highlight i {
+  display: block;
+  overflow: hidden;
+  color: rgba(255, 255, 255, .95);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
