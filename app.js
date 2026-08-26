@@ -19,7 +19,7 @@
     ["home", "house", "首页"], ["itinerary", "calendar-days", "行程"], ["map", "map", "地图"], ["cities", "landmark", "城市"], ["checklist", "list-checks", "清单"]
   ];
   const checkSections = {
-    "行前": ["护照、身份证与签证材料分开放置", "国际段建议提前 3 小时抵达机场", "移动电源与备用锂电池必须随身携带", "返程跨日抵达杭州，预留次日休整时间"],
+    "行前": ["护照、身份证与签证材料分开放置", "国际段建议提前 3 小时抵达机场", "移动电源与备用锂电池必须随身携带", "随团 WiFi：2 人 1 台，行程结束统一回收", "返程跨日抵达杭州，预留次日休整时间"],
     "必备物品": ["内衣、内裤、袜子 ×7", "睡衣 1 套、拖鞋", "钱包、零钱袋、锁封袋", "烧水杯、泡腾片、转换插头", "垃圾袋、雨衣或雨伞", "过敏药、止泻药、退烧药、晕车药", "湿纸巾、洗脸巾、化妆棉、卫生巾", "洗护用品、防晒、帽子", "U 盘、3C 认证充电宝、数据线", "充电头、Pocket、耳机", "墨镜、零食、现金"],
     "应用": ["Google Maps：步行、餐厅与公交查询", "Google Translate：离线下载西班牙语、葡萄牙语", "WhatsApp：酒店与当地联络", "Uber / Bolt：城市内叫车备用", "XE Currency：欧元汇率与消费换算"],
     "当地注意": ["餐厅晚餐时间普遍较晚，热门地点建议提前订位", "教堂与宫殿依现场规定着装，避免露肩与过短下装", "热门景区与地铁站留意随身包，不在街边外露证件", "西葡插座常见 C / F 型，准备欧标转换头", "水和公厕不一定随处免费，备少量硬币更方便"]
@@ -49,6 +49,29 @@
 
   function localSpotName(name) {
     return C.localNames?.spots?.[name] || "";
+  }
+
+  function durationLabel(minutes) {
+    if (!minutes) return "";
+    const hours = Math.floor(minutes / 60);
+    const remainder = minutes % 60;
+    if (!hours) return `${minutes} 分钟`;
+    return remainder ? `${hours} 小时 ${remainder} 分钟` : `${hours} 小时`;
+  }
+
+  function minimumStayLabel(visit, fallback = "") {
+    return visit?.minimumDurationMinutes ? `不少于 ${durationLabel(visit.minimumDurationMinutes)}` : fallback;
+  }
+
+  function mapMealTags(day) {
+    const meals = day.meals || {};
+    return `<div class="route-meals" aria-label="D${day.day} 餐食"><span class="meal-status ${meals.breakfast === "×" ? "excluded" : "included"}">早 · ${esc(meals.breakfast || "×")}</span><span class="meal-status ${meals.lunch === "×" ? "excluded" : "included"}">午 · ${esc(meals.lunch || "×")}</span><span class="meal-status ${meals.dinner === "×" ? "excluded" : meals.dinner === "含" ? "included" : "special"}">晚 · ${esc(meals.dinner || "×")}</span></div>`;
+  }
+
+  function foodExperienceStrip() {
+    const foods = C.foodExperiences || [];
+    if (!foods.length) return "";
+    return `<section class="food-experiences"><div class="food-experiences-head"><div><div class="eyebrow">Taste itinerary</div><h2>三种美食体验</h2></div><span>全程含餐</span></div><div class="food-experience-list">${foods.map(food => `<div class="food-experience"><b>${esc(food.name)}</b><i>${esc(food.local)}</i><small>${esc(food.detail)}</small></div>`).join("")}</div></section>`;
   }
 
   function coachText(segment) {
@@ -97,6 +120,7 @@
       </section>
       <div class="trip-strip"><div><strong>11</strong><span>旅行天数</span></div><div><strong>12</strong><span>途经城市</span></div><div><strong>2</strong><span>目的国家</span></div></div>
       <div class="journey-intro"><b>一条从王宫走向大西洋的环线</b><p>高迪建筑巡礼、世界遗产宫城、安达卢西亚白色小镇与葡萄牙大航海记忆，均已按日程放入可点开的移动卡片。</p></div>
+      ${foodExperienceStrip()}
       <div class="section-head page-pad"><h2>选择行程日</h2><button class="text-button" data-view="itinerary">全部行程 <i data-lucide="arrow-right"></i></button></div>
       <div class="day-scroller">${itinerary.days.map(item => `<button class="day-pill ${item.day === day.day ? "active" : ""}" data-select-day="${item.day}"><b>D${item.day}</b><span>${item.date.slice(5).replace("-", "/")}</span></button>`).join("")}</div>
       <section class="day-journey"><div class="day-journey-head"><div><span>D${day.day} · ${day.weekday}</span><b>${esc(cityNameForRoute(day))}</b></div><em>${coachDistance ? `${coachDistance} km` : day.transport.includes("flight") ? "飞行日" : "市内游览"}</em></div><div class="day-route-string">${day.route.map(stop => `<strong>${esc(stop)}</strong>`).join(`<i data-lucide="chevron-right"></i>`)}</div><div class="transport-summary">${transportSummary}</div></section>
@@ -107,7 +131,7 @@
 
   function attractionCard(visit, index) {
     const image = imageFor(visit.nameZh, visit.city);
-    const duration = visit.minimumDurationMinutes ? `${visit.minimumDurationMinutes} 分钟` : "团队节奏";
+    const duration = minimumStayLabel(visit, visit.modes.includes("food") ? "特色品尝" : "团队安排");
     return `<button class="attraction-card" data-spot="${esc(visit.nameZh)}" data-city="${esc(visit.city)}"><img data-image-preview src="${image}" alt="${esc(visit.nameZh)}" onerror="this.src='assets/images/${C.cities[visit.city]?.image || "cover"}.jpg'"><span class="attraction-index">${String(index).padStart(2, "0")}</span><div class="attraction-body"><small>${esc(visit.city)} · ${duration}</small><b>${esc(visit.nameZh)}</b><div class="mode-row">${modeTags(visit.modes)}</div></div></button>`;
   }
 
@@ -125,12 +149,12 @@
   }
 
   function flowStop(visit, index) {
-    const duration = visit.minimumDurationMinutes ? `建议 ${visit.minimumDurationMinutes} 分钟` : "跟随团队节奏";
+    const duration = minimumStayLabel(visit, visit.modes.includes("food") ? "特色品尝" : "团队安排");
     return `<button class="flow-stop" data-spot="${esc(visit.nameZh)}" data-city="${esc(visit.city)}"><span class="flow-stop-number">${String(index).padStart(2, "0")}</span><span class="flow-stop-content"><small>${esc(visit.city)} · ${duration}</small><b>${esc(visit.nameZh)}</b><span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`;
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点，黄点为吃与带走；地图可缩放、拖动。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#e6ae2d"></i>吃与带走</span></div><div class="map-route-list">${itinerary.days.filter(day => day.day >= 2 && day.day <= 9).map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || "市内游览"}</small></div></div>`).join("")}</div></section>`;
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点，黄点为吃与带走；每日行程标注早、午、晚餐。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#e6ae2d"></i>吃与带走</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
   }
 
   function citiesView() {
@@ -147,7 +171,7 @@
     const profile = C.cities[city];
     const visits = cityVisits(city);
     const architecture = profile.architecture || { style: profile.culture, makers: "这座城市的风貌来自不同时代的建造者与日常生活的共同塑造。" };
-    return `<section class="view city-detail"><section class="city-hero"><img data-image-preview src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}<span class="city-hero-local-name">${esc(localCityName(city))}</span></h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="guide-card"><h3>${esc(profile.guide.title)}</h3><p><b>这样走：</b>${esc(profile.guide.route)}</p><p><b>怎么拍：</b>${esc(profile.guide.photo)}</p><p><b>时间有限：</b>${esc(profile.guide.quick)}</p></div><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name"><b>${esc(visit.nameZh)}</b><i class="spot-local-name">${esc(localSpotName(visit.nameZh))}</i><span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc, city)).join("")}</div></section></section>`;
+    return `<section class="view city-detail"><section class="city-hero"><img data-image-preview src="assets/images/${profile.image}.jpg" alt="${esc(city)}" onerror="this.src='assets/images/cover.jpg'"><div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}<span class="city-hero-local-name">${esc(localCityName(city))}</span></h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="guide-card"><h3>${esc(profile.guide.title)}</h3><p><b>这样走：</b>${esc(profile.guide.route)}</p><p><b>怎么拍：</b>${esc(profile.guide.photo)}</p><p><b>时间有限：</b>${esc(profile.guide.quick)}</p></div><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name"><b>${esc(visit.nameZh)}</b><i class="spot-local-name">${esc(localSpotName(visit.nameZh))}</i>${visit.minimumDurationMinutes ? `<span class="spot-stay">游览${minimumStayLabel(visit)}</span>` : ""}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc, city)).join("")}</div></section></section>`;
   }
 
   function foodCard(name, desc, city) {
@@ -168,8 +192,9 @@
     const visit = cityVisits(city).find(item => item.nameZh === name) || allVisits.find(item => item.nameZh === name);
     const profile = C.cities[city];
     const photo = imageFor(name, city);
-    const duration = visit?.minimumDurationMinutes ? `${visit.minimumDurationMinutes} 分钟` : "跟随团队";
-    sheetContent.innerHTML = `<section class="sheet-hero"><img data-image-preview src="${photo}" alt="${esc(name)}" onerror="this.src='assets/images/${profile?.image || "cover"}.jpg'"><h2>${esc(name)}<span class="sheet-local-name">${esc(localSpotName(name))}</span></h2></section><section class="sheet-body"><div class="tag-row">${modeTags(visit?.modes || [])}</div><div class="spot-facts"><div><b>${esc(city)}</b><span>所在城市</span></div><div><b>${duration}</b><span>建议停留</span></div><div><b>${visit?.modes.includes("inside") ? "含门票" : "按行程"}</b><span>参观方式</span></div></div><h3>30 秒速览</h3><p>${esc(profile?.guide?.history || `${name}是本行程的重要停留节点。`)}</p><h3>在现场这样看</h3><p>${esc(profile?.guide?.route || "先观察整体空间，再把注意力放在建筑的材质、光线与人流交汇处。")}</p><h3>拍照与节奏</h3><p>${esc(profile?.guide?.photo || "避开正门人流，选择侧面光线与更低的机位，先看十秒再按快门。")}</p><button class="sheet-map-link" data-map-spot="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></section>`;
+    const duration = minimumStayLabel(visit, visit?.modes.includes("food") ? "特色品尝" : "行程未标注");
+    const notice = C.spotNotices?.[name];
+    sheetContent.innerHTML = `<section class="sheet-hero"><img data-image-preview src="${photo}" alt="${esc(name)}" onerror="this.src='assets/images/${profile?.image || "cover"}.jpg'"><h2>${esc(name)}<span class="sheet-local-name">${esc(localSpotName(name))}</span></h2></section><section class="sheet-body"><div class="tag-row">${modeTags(visit?.modes || [])}</div><div class="spot-facts"><div><b>${esc(city)}</b><span>所在城市</span></div><div><b>${esc(duration)}</b><span>游览时长</span></div><div><b>${visit?.modes.includes("inside") ? "含门票" : "按行程"}</b><span>参观方式</span></div></div>${notice ? `<section class="spot-notice"><h3>${esc(notice.title)}</h3><p>${esc(notice.text)}</p></section>` : ""}<h3>30 秒速览</h3><p>${esc(profile?.guide?.history || `${name}是本行程的重要停留节点。`)}</p><h3>在现场这样看</h3><p>${esc(profile?.guide?.route || "先观察整体空间，再把注意力放在建筑的材质、光线与人流交汇处。")}</p><h3>拍照与节奏</h3><p>${esc(profile?.guide?.photo || "避开正门人流，选择侧面光线与更低的机位，先看十秒再按快门。")}</p><button class="sheet-map-link" data-map-spot="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></section>`;
     sheet.showModal();
     refreshIcons();
   }
