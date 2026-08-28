@@ -1,28 +1,6 @@
-/* Image preview keeps city and attraction photos inspectable without changing card actions. */
-[data-image-preview] { cursor: zoom-in; -webkit-tap-highlight-color: transparent; }
 .city-card::after,
 .city-hero::after,
 .attraction-card::after,
 .sheet-hero::after { pointer-events: none; }
 .city-card-body { position: absolute; right: 0; bottom: 0; left: 0; min-height: 0; }
 .city-hero-content { position: absolute; right: 0; bottom: 0; left: 0; min-height: 0; }
-
-.image-lightbox {
-  width: min(100vw, 560px);
-  max-width: 560px;
-  height: 100dvh;
-  max-height: none;
-  margin: 0 auto;
-  padding: 18px;
-  border: 0;
-  color: white;
-  background: rgba(3, 20, 18, .97);
-  overflow: hidden;
-}
-.image-lightbox::backdrop { background: rgba(3, 20, 18, .62); backdrop-filter: blur(5px); }
-.image-lightbox[open] { display: grid; place-items: center; }
-.image-lightbox-stage { display: grid; width: 100%; max-height: 100%; margin: 0; gap: 10px; place-items: center; }
-.image-lightbox-stage img { display: block; width: auto; max-width: 100%; max-height: calc(100dvh - 82px); border-radius: 4px; object-fit: contain; box-shadow: 0 16px 44px rgba(0, 0, 0, .42); }
-.image-lightbox-stage figcaption { max-width: 100%; overflow: hidden; color: rgba(255, 255, 255, .78); font-size: 12px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-.image-lightbox-close { position: fixed; z-index: 1; top: calc(12px + env(safe-area-inset-top)); right: max(14px, calc((100vw - 560px) / 2 + 14px)); display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255, 255, 255, .42); border-radius: 50%; color: white; background: rgba(3, 20, 18, .58); }
-.image-lightbox-close svg { width: 19px; height: 19px; }
