@@ -38,16 +38,73 @@
     return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
   }
 
-  function imageFor(name, city) {
+  const prefetchedImageKeys = new Set();
+
+  function imageKeyFor(name, city) {
     const profile = C.cities[city];
     const preferredKey = C.imageKeys[name] || profile?.image || "cover";
     const cityKey = profile?.image || "cover";
-    const key = imageAssetKeys.has(preferredKey) ? preferredKey : imageAssetKeys.has(cityKey) ? cityKey : "cover";
-    return mobileImageForKey(key);
+    return imageAssetKeys.has(preferredKey) ? preferredKey : imageAssetKeys.has(cityKey) ? cityKey : "cover";
   }
 
   function mobileImageForKey(key) {
     return `assets/images/mobile/${imageAssetKeys.has(key) ? key : "cover"}.jpg`;
+  }
+
+  function smallImageForKey(key) {
+    return `assets/images/small/${imageAssetKeys.has(key) ? key : "cover"}.jpg`;
+  }
+
+  function thumbImageForKey(key) {
+    return `assets/images/thumb/${imageAssetKeys.has(key) ? key : "cover"}.jpg`;
+  }
+
+  function responsiveImage(key, alt, options = {}) {
+    const safeKey = imageAssetKeys.has(key) ? key : "cover";
+    const loading = options.loading || "lazy";
+    const className = options.className ? ` ${options.className}` : "";
+    const fetchPriority = options.fetchPriority ? ` fetchpriority="${options.fetchPriority}"` : "";
+    const sources = options.sources === "small"
+      ? `${smallImageForKey(safeKey)} 480w`
+      : `${smallImageForKey(safeKey)} 480w, ${mobileImageForKey(safeKey)} 900w`;
+    const source = options.sources === "small" ? smallImageForKey(safeKey) : mobileImageForKey(safeKey);
+    const sizes = options.sizes || "(max-width: 600px) 100vw, 560px";
+    const fallback = mobileImageForKey(options.fallbackKey || "cover");
+    return `<img class="progressive-image${className}" src="${source}" srcset="${sources}" sizes="${sizes}" alt="${esc(alt)}" loading="${loading}"${fetchPriority} decoding="async" style="--image-placeholder:url('${thumbImageForKey(safeKey)}')" onload="this.classList.add('image-ready')" onerror="this.onerror=null;this.removeAttribute('srcset');this.classList.remove('image-ready');this.src='${fallback}'">`;
+  }
+
+  function canPrefetchImages() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    return !connection || (!connection.saveData && !["slow-2g", "2g"].includes(connection.effectiveType));
+  }
+
+  function scheduleImagePrefetch(keys) {
+    if (!canPrefetchImages()) return;
+    const queue = [...new Set(keys.filter(key => imageAssetKeys.has(key) && !prefetchedImageKeys.has(key)))].slice(0, 2);
+    if (!queue.length) return;
+    queue.forEach(key => prefetchedImageKeys.add(key));
+    const warmCache = () => queue.forEach(key => {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = smallImageForKey(key);
+    });
+    if ("requestIdleCallback" in window) window.requestIdleCallback(warmCache, { timeout: 900 });
+    else window.setTimeout(warmCache, 260);
+  }
+
+  function prefetchForCurrentView() {
+    if (state.view === "home") {
+      const day = itinerary.days.find(item => item.day === state.selectedDay) || itinerary.days[1];
+      scheduleImagePrefetch(day.visits.filter(visit => !visit.modes.includes("conditional")).slice(2, 4).map(visit => imageKeyFor(visit.nameZh, visit.city)));
+      return;
+    }
+    if (state.view === "cities") {
+      scheduleImagePrefetch(cityOrder.slice(3, 5).map(city => imageKeyFor("", city)));
+      return;
+    }
+    if (state.view === "city") {
+      scheduleImagePrefetch(cityVisits(state.city).slice(0, 2).map(visit => imageKeyFor(visit.nameZh, visit.city)));
+    }
   }
 
   function modeTags(modes = []) {
@@ -121,7 +178,7 @@
       : `<span><i data-lucide="${day.transport.includes("flight") ? "plane" : "hotel"}"></i>${esc(day.notes?.[0] || "市内游览与休整")}</span>`;
     return `<section class="view home-view">
       <section class="hero">
-        <img class="hero-image" src="${mobileImageForKey("cover")}" alt="西班牙葡萄牙旅行风景" fetchpriority="high" decoding="async">
+        ${responsiveImage("cover", "西班牙葡萄牙旅行风景", { className: "hero-image", loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px" })}
         <div class="hero-content">
           <div class="eyebrow">29 SEP — 09 OCT 2026</div>
           <h1>伊比利亚<br>光影纪行</h1>
@@ -141,10 +198,10 @@
   }
 
   function attractionCard(visit, index) {
-    const image = imageFor(visit.nameZh, visit.city);
+    const imageKey = imageKeyFor(visit.nameZh, visit.city);
     const duration = minimumStayLabel(visit, visit.modes.includes("food") ? "特色品尝" : "团队安排");
     const eager = index <= 2;
-    return `<button class="attraction-card" data-spot="${esc(visit.nameZh)}" data-city="${esc(visit.city)}"><img src="${image}" alt="${esc(visit.nameZh)}" loading="${eager ? "eager" : "lazy"}" ${index === 1 ? "fetchpriority=\"high\"" : ""} decoding="async" onerror="this.onerror=null;this.src='${mobileImageForKey("cover")}'"><span class="attraction-index">${String(index).padStart(2, "0")}</span><div class="attraction-body"><small>${esc(visit.city)} · ${duration}</small><b>${esc(visit.nameZh)}</b><div class="mode-row">${modeTags(visit.modes)}</div></div></button>`;
+    return `<button class="attraction-card" data-spot="${esc(visit.nameZh)}" data-city="${esc(visit.city)}">${responsiveImage(imageKey, visit.nameZh, { loading: eager ? "eager" : "lazy", fetchPriority: index === 1 ? "high" : "", sources: "small", sizes: "228px" })}<span class="attraction-index">${String(index).padStart(2, "0")}</span><div class="attraction-body"><small>${esc(visit.city)} · ${duration}</small><b>${esc(visit.nameZh)}</b><div class="mode-row">${modeTags(visit.modes)}</div></div></button>`;
   }
 
   function itineraryView() {
@@ -176,15 +233,15 @@
   function cityCard(city, index) {
     const profile = C.cities[city];
     const highlights = C.cityGuideHighlights?.[city] || { style: "城市建筑脉络", makers: "塑造这座城市的人" };
-    const eager = index < 3;
-    return `<button class="city-card" data-city-page="${esc(city)}"><img src="${imageFor("", city)}" alt="${esc(city)}" loading="${eager ? "eager" : "lazy"}" ${index === 0 ? "fetchpriority=\"high\"" : ""} decoding="async" onerror="this.onerror=null;this.src='${mobileImageForKey("cover")}'"><span class="city-arrow"><i data-lucide="arrow-up-right"></i></span><div class="city-card-body"><small>${esc(profile.days)} · ${esc(profile.country)}</small><h2>${esc(city)}<span class="city-local-name">${esc(localCityName(city))}</span></h2><div class="city-highlights"><span class="city-highlight"><b>建筑风格</b><i>${esc(highlights.style)}</i></span><span class="city-highlight"><b>关键影响人</b><i>${esc(highlights.makers)}</i></span></div></div></button>`;
+    const eager = index === 0;
+    return `<button class="city-card" data-city-page="${esc(city)}">${responsiveImage(imageKeyFor("", city), city, { loading: eager ? "eager" : "lazy", fetchPriority: eager ? "high" : "", sources: "small", sizes: "(max-width: 600px) calc(100vw - 36px), 524px" })}<span class="city-arrow"><i data-lucide="arrow-up-right"></i></span><div class="city-card-body"><small>${esc(profile.days)} · ${esc(profile.country)}</small><h2>${esc(city)}<span class="city-local-name">${esc(localCityName(city))}</span></h2><div class="city-highlights"><span class="city-highlight"><b>建筑风格</b><i>${esc(highlights.style)}</i></span><span class="city-highlight"><b>关键影响人</b><i>${esc(highlights.makers)}</i></span></div></div></button>`;
   }
 
   function cityView(city) {
     const profile = C.cities[city];
     const visits = cityVisits(city);
     const architecture = profile.architecture || { style: profile.culture, makers: "这座城市的风貌来自不同时代的建造者与日常生活的共同塑造。" };
-    return `<section class="view city-detail"><section class="city-hero"><img src="${imageFor("", city)}" alt="${esc(city)}" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src='${mobileImageForKey("cover")}'"><div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}<span class="city-hero-local-name">${esc(localCityName(city))}</span></h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="guide-card"><h3>${esc(profile.guide.title)}</h3><p><b>这样走：</b>${esc(profile.guide.route)}</p><p><b>怎么拍：</b>${esc(profile.guide.photo)}</p><p><b>时间有限：</b>${esc(profile.guide.quick)}</p></div><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name"><b>${esc(visit.nameZh)}</b><i class="spot-local-name">${esc(localSpotName(visit.nameZh))}</i>${visit.minimumDurationMinutes ? `<span class="spot-stay">游览${minimumStayLabel(visit)}</span>` : ""}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc, city)).join("")}</div></section></section>`;
+    return `<section class="view city-detail"><section class="city-hero">${responsiveImage(imageKeyFor("", city), city, { loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}<span class="city-hero-local-name">${esc(localCityName(city))}</span></h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="guide-card"><h3>${esc(profile.guide.title)}</h3><p><b>这样走：</b>${esc(profile.guide.route)}</p><p><b>怎么拍：</b>${esc(profile.guide.photo)}</p><p><b>时间有限：</b>${esc(profile.guide.quick)}</p></div><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name"><b>${esc(visit.nameZh)}</b><i class="spot-local-name">${esc(localSpotName(visit.nameZh))}</i>${visit.minimumDurationMinutes ? `<span class="spot-stay">游览${minimumStayLabel(visit)}</span>` : ""}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc, city)).join("")}</div></section></section>`;
   }
 
   function foodCard(name, desc, city) {
@@ -258,12 +315,15 @@
   function openSpot(name, city) {
     const visit = cityVisits(city).find(item => item.nameZh === name) || allVisits.find(item => item.nameZh === name);
     const profile = C.cities[city];
-    const photo = imageFor(name, city);
+    const photoKey = imageKeyFor(name, city);
     const duration = minimumStayLabel(visit, visit?.modes.includes("food") ? "特色品尝" : "行程未标注");
     const notice = C.spotNotices?.[name];
-    sheetContent.innerHTML = `<section class="sheet-hero"><img src="${photo}" alt="${esc(name)}" fetchpriority="high" decoding="async" onerror="this.onerror=null;this.src='${mobileImageForKey(profile?.image || "cover")}'"><h2>${esc(name)}<span class="sheet-local-name">${esc(localSpotName(name))}</span></h2></section><section class="sheet-body"><div class="tag-row">${modeTags(visit?.modes || [])}</div><div class="spot-facts"><div><b>${esc(city)}</b><span>所在城市</span></div><div><b>${esc(duration)}</b><span>游览时长</span></div><div><b>${visit?.modes.includes("inside") ? "含门票" : "按行程"}</b><span>参观方式</span></div></div>${notice ? `<section class="spot-notice"><h3>${esc(notice.title)}</h3><p>${esc(notice.text)}</p></section>` : ""}<h3>30 秒速览</h3><p>${esc(profile?.guide?.history || `${name}是本行程的重要停留节点。`)}</p><h3>在现场这样看</h3><p>${esc(profile?.guide?.route || "先观察整体空间，再把注意力放在建筑的材质、光线与人流交汇处。")}</p><h3>拍照与节奏</h3><p>${esc(profile?.guide?.photo || "避开正门人流，选择侧面光线与更低的机位，先看十秒再按快门。")}</p><button class="sheet-map-link" data-map-spot="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></section>`;
+    sheetContent.innerHTML = `<section class="sheet-hero">${responsiveImage(photoKey, name, { loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px", fallbackKey: imageKeyFor("", city) })}<h2>${esc(name)}<span class="sheet-local-name">${esc(localSpotName(name))}</span></h2></section><section class="sheet-body"><div class="tag-row">${modeTags(visit?.modes || [])}</div><div class="spot-facts"><div><b>${esc(city)}</b><span>所在城市</span></div><div><b>${esc(duration)}</b><span>游览时长</span></div><div><b>${visit?.modes.includes("inside") ? "含门票" : "按行程"}</b><span>参观方式</span></div></div>${notice ? `<section class="spot-notice"><h3>${esc(notice.title)}</h3><p>${esc(notice.text)}</p></section>` : ""}<h3>30 秒速览</h3><p>${esc(profile?.guide?.history || `${name}是本行程的重要停留节点。`)}</p><h3>在现场这样看</h3><p>${esc(profile?.guide?.route || "先观察整体空间，再把注意力放在建筑的材质、光线与人流交汇处。")}</p><h3>拍照与节奏</h3><p>${esc(profile?.guide?.photo || "避开正门人流，选择侧面光线与更低的机位，先看十秒再按快门。")}</p><button class="sheet-map-link" data-map-spot="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></section>`;
     sheet.showModal();
     refreshIcons();
+    const citySpots = cityVisits(city);
+    const currentIndex = citySpots.findIndex(item => item.nameZh === name);
+    scheduleImagePrefetch(citySpots.slice(currentIndex + 1, currentIndex + 3).map(item => imageKeyFor(item.nameZh, item.city)));
   }
 
   function initializeMap() {
@@ -305,6 +365,7 @@
     window.scrollTo({ top: 0, behavior: "instant" });
     if (state.view === "map") window.setTimeout(initializeMap, 0);
     if (state.view === "checklist" && state.checklist === "汇率转换") window.setTimeout(refreshExchangeRate, 0);
+    prefetchForCurrentView();
   }
 
   function refreshIcons() {
