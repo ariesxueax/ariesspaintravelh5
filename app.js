@@ -16,7 +16,7 @@
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
   const tabItems = [
-    ["home", "house", "首页"], ["itinerary", "calendar-days", "行程"], ["map", "map", "地图"], ["cities", "landmark", "城市"], ["checklist", "list-checks", "清单"], ["ending", "quote", "句号"]
+    ["home", "house", "首页"], ["itinerary", "calendar-days", "行程"], ["map", "map", "地图"], ["cities", "landmark", "城市"], ["checklist", "list-checks", "清单"], ["translation", "languages", "翻译"]
   ];
   const checkSections = {
     "行前": ["护照、身份证与签证材料分开放置", "国际段建议提前 3 小时抵达机场", "移动电源与备用锂电池必须随身携带", "随团 WiFi：2 人 1 台，行程结束统一回收", "返程跨日抵达杭州，预留次日休整时间"],
@@ -142,7 +142,7 @@
     return `<section class="food-experiences"><div class="food-experiences-head"><div><div class="eyebrow">Taste itinerary</div><h2>三种美食体验</h2></div><span>全程含餐</span></div><div class="food-experience-list">${foods.map(food => `<div class="food-experience"><b>${esc(food.name)}</b><i>${esc(food.local)}</i><small>${esc(food.detail)}</small></div>`).join("")}</div></section>`;
   }
 
-  function endingView() {
+  function travelQuoteMarkup() {
     const quoteLines = [
       ["To see the world,", "观天地之大,"],
       ["things dangerous to come to.", "涉险远之途,"],
@@ -151,7 +151,23 @@
       ["to find each other,", "觅同道之人,"],
       ["and to feel, That is the purpose of LIFE.", "感万物之道。"]
     ];
-    return `<section class="view ending-view"><section class="ending-hero">${responsiveImage("plaza-espana-seville", "塞维利亚西班牙广场", { className: "ending-image", loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="ending-hero-copy"><div class="eyebrow">Iberian journey · 2026</div><h1>世界，在路的尽头继续展开</h1></div></section><section class="ending-quote" aria-label="旅行终章引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
+    return `<section class="translation-epilogue" aria-label="旅行终章"><div class="translation-epilogue-label"><span></span><b>旅程终章</b><span></span></div><section class="ending-hero">${responsiveImage("plaza-espana-seville", "塞维利亚西班牙广场", { className: "ending-image", loading: "lazy", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="ending-hero-copy"><div class="eyebrow">Iberian journey · 2026</div><h1>世界，在路的尽头继续展开</h1></div></section><section class="ending-quote" aria-label="旅行终章引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
+  }
+
+  function translationView() {
+    const scenes = [
+      { title: "基础社交", local: "Saludos", icon: "messages-circle", phrases: [["Hola, buenos días.", "[ˈola ˈbwenos ˈdi.as]", "欧拉，布埃诺斯 迪亚斯", "你好，早上好。"], ["Por favor.", "[poɾ faˈβoɾ]", "波尔 法沃尔", "请。"], ["Muchas gracias.", "[ˈmutʃas ˈɣɾa.sjas]", "穆恰斯 格拉西亚斯", "非常感谢。"]] },
+      { title: "交通出行", local: "Transporte", icon: "bus-front", phrases: [["¿Dónde está la estación?", "[ˈdonde esˈta la estaˈsjon]", "冬德 埃斯塔 拉 埃斯塔西翁", "车站在哪里？"], ["Quiero ir a...", "[ˈkjeɾo iɾ a]", "基耶罗 伊尔 阿", "我想去……"], ["¿Este autobús va al centro?", "[ˈeste awtoˈβus βa al ˈsentɾo]", "埃斯特 奥托布斯 巴 阿尔 森特罗", "这趟公交去市中心吗？"]] },
+      { title: "酒店住宿", local: "Hotel", icon: "bed-double", phrases: [["Tengo una reserva a nombre de...", "[ˈteŋɡo una reˈseɾβa a ˈnombɾe de]", "滕戈 乌纳 雷塞尔巴 阿 农布雷 德", "我有一个……名字预订。"], ["¿A qué hora es el desayuno?", "[a ke ˈoɾa es el desaˈʝuno]", "阿 克 奥拉 埃斯 埃尔 德萨尤诺", "早餐几点开始？"], ["¿Puede guardar mi equipaje?", "[ˈpweðe ɣwaɾˈðaɾ mi ekipaˈxe]", "普埃德 瓜尔达尔 米 埃基帕赫", "可以帮我寄存行李吗？"]] },
+      { title: "餐饮美食", local: "Restaurante", icon: "utensils", phrases: [["Una mesa para dos, por favor.", "[ˈuna ˈmesa ˈpaɾa ðos poɾ faˈβoɾ]", "乌纳 梅萨 帕拉 多斯 波尔 法沃尔", "请给两位一张桌子。"], ["¿Qué nos recomienda?", "[ke nos rekomenˈðjenda]", "克 诺斯 雷科门迭恩达", "您推荐什么？"], ["La cuenta, por favor.", "[la ˈkwenta poɾ faˈβoɾ]", "拉 昆塔 波尔 法沃尔", "请结账。"]] },
+      { title: "购物消费", local: "Compras", icon: "shopping-bag", phrases: [["¿Cuánto cuesta?", "[ˈkwanto ˈkwesta]", "关托 奎斯塔", "这个多少钱？"], ["¿Puedo pagar con tarjeta?", "[ˈpweðo paˈɣaɾ kon taɾˈxeta]", "普埃多 帕加尔 孔 塔尔赫塔", "可以刷卡吗？"], ["Solo estoy mirando, gracias.", "[ˈsolo esˈtoj miˈɾando ˈɣɾa.sjas]", "索洛 埃斯托伊 米兰多 格拉西亚斯", "我只是看看，谢谢。"]] },
+      { title: "观光游览", local: "Visitas", icon: "camera", phrases: [["¿Dónde está la entrada?", "[ˈdonde esˈta la enˈtɾaða]", "冬德 埃斯塔 拉 恩特拉达", "入口在哪里？"], ["¿A qué hora cierra?", "[a ke ˈoɾa ˈsjera]", "阿 克 奥拉 谢拉", "几点关门？"], ["¿Podría sacar una foto, por favor?", "[poˈðɾia sakaɾ una ˈfoto poɾ faˈβoɾ]", "波德里亚 萨卡尔 乌纳 福托 波尔 法沃尔", "可以帮我拍张照片吗？"]] },
+      { title: "紧急求助", local: "Emergencia", icon: "siren", phrases: [["¡Ayuda, por favor!", "[aˈʝuða poɾ faˈβoɾ]", "阿尤达 波尔 法沃尔", "请帮帮我！"], ["Necesito un médico.", "[neseˈsito un ˈmeðiko]", "内塞西托 温 梅迪科", "我需要医生。"], ["He perdido mi pasaporte.", "[e peɾˈðiðo mi pasaˈpoɾte]", "埃 佩尔迪多 米 帕萨波尔特", "我的护照丢了。"]] },
+      { title: "通讯网络", local: "Conexión", icon: "wifi", phrases: [["¿Hay Wi-Fi gratis?", "[ai wiˈfi ˈɣɾatis]", "艾 维菲 格拉蒂斯", "有免费 Wi-Fi 吗？"], ["¿Cuál es la contraseña?", "[kwal es la kontɾaˈseɲa]", "夸尔 埃斯 拉 孔特拉塞尼亚", "密码是什么？"], ["No tengo señal.", "[no ˈteŋɡo seˈɲal]", "诺 滕戈 塞尼亚尔", "我没有信号。"]] },
+      { title: "数字与时间", local: "Números y hora", icon: "clock-3", phrases: [["¿Qué hora es?", "[ke ˈoɾa es]", "克 奥拉 埃斯", "现在几点？"], ["¿A qué hora sale?", "[a ke ˈoɾa ˈsale]", "阿 克 奥拉 萨莱", "几点出发？"], ["Dos entradas, por favor.", "[dos enˈtɾaðas poɾ faˈβoɾ]", "多斯 恩特拉达斯 波尔 法沃尔", "请给两张票。"]] },
+      { title: "沟通兜底", local: "Comunicación", icon: "message-circle-question", phrases: [["No hablo español.", "[no ˈaβlo espaˈɲol]", "诺 阿布洛 埃斯帕尼奥尔", "我不会说西班牙语。"], ["¿Habla más despacio, por favor?", "[ˈaβla mas desˈpasjo poɾ faˈβoɾ]", "阿布拉 马斯 德斯帕西奥 波尔 法沃尔", "请说慢一点，可以吗？"], ["¿Puede escribirlo, por favor?", "[ˈpweðe eskɾiˈβiɾlo poɾ faˈβoɾ]", "普埃德 埃斯克里比尔洛 波尔 法沃尔", "可以写下来吗？"]] }
+    ];
+    return `<section class="view translation-view"><header class="translation-header"><div class="eyebrow">Spanish travel essential</div><h1>常用翻译</h1><p>西班牙旅行 10 个场景，30 句随用随查的必备西语。</p><div class="translation-key"><span>西语</span><i>IPA 音标</i><b>中文谐音</b><em>中文意思</em></div></header><div class="translation-scene-list">${scenes.map((scene, index) => `<section class="translation-scene"><header class="translation-scene-head"><span>${String(index + 1).padStart(2, "0")}</span><div><small>${esc(scene.local)}</small><h2>${esc(scene.title)}</h2></div><i data-lucide="${scene.icon}"></i></header>${scene.phrases.map(([spanish, ipa, homophone, chinese]) => `<article class="translation-phrase"><b lang="es">${esc(spanish)}</b><dl class="translation-detail"><div><dt>西语音标</dt><dd>${esc(ipa)}</dd></div><div><dt>中文谐音</dt><dd>${esc(homophone)}</dd></div><div class="translation-meaning"><dt>中文翻译</dt><dd>${esc(chinese)}</dd></div></dl></article>`).join("")}</section>`).join("")}</div>${travelQuoteMarkup()}</section>`;
   }
 
   function coachText(segment) {
@@ -195,7 +211,7 @@
           <div class="eyebrow">29 SEP — 09 OCT 2026</div>
           <h1>伊比利亚<br>光影纪行</h1>
           <p>从马德里的王室尺度，穿过高迪的曲线与安达卢西亚白墙，抵达大西洋尽头。</p>
-          <div class="hero-actions"><button class="primary-button" data-view="itinerary"><i data-lucide="calendar-days"></i>查看全程</button><button class="secondary-button" data-view="map"><i data-lucide="map"></i>路线地图</button></div>
+          <div class="hero-actions"><button class="primary-button" data-view="itinerary"><i data-lucide="calendar-days"></i>查看全程</button><button class="secondary-button" data-view="map"><i data-lucide="map"></i>路线地图</button><button class="secondary-button hero-translation-button" data-view="translation"><i data-lucide="languages"></i>常用翻译</button></div>
         </div>
       </section>
       <div class="trip-strip"><div><strong>11</strong><span>旅行天数</span></div><div><strong>12</strong><span>途经城市</span></div><div><strong>2</strong><span>目的国家</span></div></div>
@@ -372,7 +388,7 @@
     if (state.map && state.view !== "map") { state.map.remove(); state.map = null; }
     topbar.innerHTML = topbarMarkup();
     tabbar.innerHTML = tabbarMarkup();
-    app.innerHTML = state.view === "home" ? homeView() : state.view === "itinerary" ? itineraryView() : state.view === "map" ? mapView() : state.view === "cities" ? citiesView() : state.view === "city" ? cityView(state.city) : state.view === "ending" ? endingView() : checklistView();
+    app.innerHTML = state.view === "home" ? homeView() : state.view === "itinerary" ? itineraryView() : state.view === "map" ? mapView() : state.view === "cities" ? citiesView() : state.view === "city" ? cityView(state.city) : state.view === "translation" ? translationView() : checklistView();
     refreshIcons();
     window.scrollTo({ top: 0, behavior: "instant" });
     if (state.view === "map") window.setTimeout(initializeMap, 0);
