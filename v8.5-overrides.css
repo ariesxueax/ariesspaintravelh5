@@ -1,0 +1,178 @@
+/* Spanish travel phrases, organized for quick reading on a phone. */
+.hero-actions { flex-wrap: wrap; }
+
+.hero-translation-button {
+  border-color: rgba(237, 210, 164, .72);
+  color: #fff7e8;
+}
+
+.translation-view {
+  padding-bottom: 0;
+  background: var(--cream);
+}
+
+.translation-header {
+  padding: 20px 18px 18px;
+  color: white;
+  background: var(--forest);
+}
+
+.translation-header .eyebrow { color: #edd2a4; }
+
+.translation-header h1 {
+  margin: 6px 0 5px;
+  font: 700 30px/1.12 Georgia, "Songti SC", serif;
+}
+
+.translation-header p {
+  max-width: 340px;
+  margin: 0;
+  color: rgba(255, 255, 255, .78);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.translation-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.translation-key span,
+.translation-key i,
+.translation-key b,
+.translation-key em {
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, .9);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.translation-scene-list { padding: 4px 18px 0; }
+
+.translation-scene {
+  padding: 23px 0 3px;
+  border-bottom: 1px solid var(--line);
+}
+
+.translation-scene-head {
+  display: grid;
+  grid-template-columns: 33px minmax(0, 1fr) 25px;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 11px;
+}
+
+.translation-scene-head > span {
+  color: var(--coral);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.translation-scene-head small {
+  display: block;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.translation-scene-head h2 {
+  margin: 3px 0 0;
+  color: var(--forest);
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.translation-scene-head svg {
+  width: 21px;
+  height: 21px;
+  color: var(--forest);
+  stroke-width: 1.7;
+}
+
+.translation-phrase {
+  padding: 13px 0 14px;
+  border-top: 1px solid #e5e6df;
+}
+
+.translation-phrase > b {
+  display: block;
+  color: var(--ink);
+  font: 700 16px/1.38 Georgia, "Times New Roman", serif;
+}
+
+.translation-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 11px;
+  margin: 10px 0 0;
+}
+
+.translation-detail div { min-width: 0; }
+
+.translation-detail dt {
+  color: #8a928c;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.translation-detail dd {
+  margin: 3px 0 0;
+  color: #45544f;
+  font-size: 11px;
+  line-height: 1.48;
+  word-break: break-word;
+}
+
+.translation-detail .translation-meaning {
+  grid-column: 1 / -1;
+  padding-top: 7px;
+  border-top: 1px dashed #d7dad2;
+}
+
+.translation-detail .translation-meaning dd {
+  color: var(--forest);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.translation-epilogue {
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 9px solid #e1e4dc;
+}
+
+.translation-epilogue-label {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 18px 16px;
+  color: var(--gold);
+}
+
+.translation-epilogue-label span {
+  flex: 1;
+  height: 1px;
+  background: #d7c8af;
+}
+
+.translation-epilogue-label b {
+  flex: 0 0 auto;
+  font: 700 13px/1 Georgia, "Songti SC", serif;
+  letter-spacing: .08em;
+}
+
+@media (max-width: 360px) {
+  .hero-actions { gap: 7px; }
+  .primary-button,
+  .secondary-button { padding: 0 11px; font-size: 13px; }
+  .translation-detail { gap: 8px; }
+  .translation-detail dd { font-size: 10px; }
+}
