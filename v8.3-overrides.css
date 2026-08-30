@@ -1,0 +1,118 @@
+/* Travel ending page. The quote remains the focal content at every viewport. */
+.ending-view {
+  min-height: calc(100dvh - 146px);
+  padding-bottom: 26px;
+  background: var(--cream);
+}
+
+.ending-hero {
+  position: relative;
+  min-height: 302px;
+  overflow: hidden;
+  color: white;
+  background: var(--pine);
+}
+
+.ending-hero .ending-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.ending-hero::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(180deg, rgba(5, 22, 21, .14), rgba(5, 22, 21, .84));
+}
+
+.ending-hero-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 302px;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 23px 20px;
+}
+
+.ending-hero-copy .eyebrow { color: #edd2a4; }
+
+.ending-hero h1 {
+  max-width: 330px;
+  margin: 8px 0 0;
+  font: 700 34px/1.12 Georgia, "Songti SC", serif;
+}
+
+.ending-quote {
+  position: relative;
+  margin: -20px 18px 0;
+  padding: 28px 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.ending-quote-mark {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  color: #d9c4a1;
+  font: 700 66px/.9 Georgia, serif;
+}
+
+.ending-quote-lines { position: relative; }
+
+.ending-quote-line {
+  margin: 0;
+  padding: 11px 0 10px;
+  border-bottom: 1px solid #e5e4dc;
+}
+
+.ending-quote-line:first-child { padding-top: 3px; }
+.ending-quote-line:last-child { padding-bottom: 3px; border-bottom: 0; }
+.ending-quote-line span,
+.ending-quote-line b { display: block; }
+
+.ending-quote-line span {
+  color: var(--muted);
+  font: 500 12px/1.42 Georgia, "Times New Roman", serif;
+  letter-spacing: .02em;
+}
+
+.ending-quote-line b {
+  margin-top: 4px;
+  color: var(--forest);
+  font: 700 18px/1.28 Georgia, "Songti SC", serif;
+}
+
+.ending-quote-line.is-final { padding-top: 15px; }
+
+.ending-quote-line.is-final span {
+  color: #3b514c;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.52;
+}
+
+.ending-quote-line.is-final b { font-size: 20px; }
+
+.ending-source {
+  margin-top: 22px;
+  color: #7f6742;
+  font: 700 12px/1.4 Georgia, "Songti SC", serif;
+  text-align: right;
+}
+
+.ending-signoff {
+  margin: 18px 18px 0;
+  color: #7a837f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-align: center;
+}
