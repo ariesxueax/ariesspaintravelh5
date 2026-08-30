@@ -16,7 +16,7 @@
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
   const tabItems = [
-    ["home", "house", "首页"], ["itinerary", "calendar-days", "行程"], ["map", "map", "地图"], ["cities", "landmark", "城市"], ["checklist", "list-checks", "清单"], ["ending", "quote", "尾页"]
+    ["home", "house", "首页"], ["itinerary", "calendar-days", "行程"], ["map", "map", "地图"], ["cities", "landmark", "城市"], ["checklist", "list-checks", "清单"], ["ending", "quote", "句号"]
   ];
   const checkSections = {
     "行前": ["护照、身份证与签证材料分开放置", "国际段建议提前 3 小时抵达机场", "移动电源与备用锂电池必须随身携带", "随团 WiFi：2 人 1 台，行程结束统一回收", "返程跨日抵达杭州，预留次日休整时间"],
@@ -151,7 +151,7 @@
       ["to find each other,", "觅同道之人,"],
       ["and to feel, That is the purpose of LIFE.", "感万物之道。"]
     ];
-    return `<section class="view ending-view"><section class="ending-hero">${responsiveImage("cabo-da-roca", "大西洋海岸", { className: "ending-image", loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="ending-hero-copy"><div class="eyebrow">Iberian journey · 2026</div><h1>世界，在路的尽头继续展开</h1></div></section><section class="ending-quote" aria-label="旅行终章引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
+    return `<section class="view ending-view"><section class="ending-hero">${responsiveImage("plaza-espana-seville", "塞维利亚西班牙广场", { className: "ending-image", loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="ending-hero-copy"><div class="eyebrow">Iberian journey · 2026</div><h1>世界，在路的尽头继续展开</h1></div></section><section class="ending-quote" aria-label="旅行终章引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
   }
 
   function coachText(segment) {
