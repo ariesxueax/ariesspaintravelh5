@@ -43,6 +43,56 @@ window.ROADBOOK_CONTENT = {
     "4月25日大桥": [-9.1770, 38.6890], "罗西奥广场": [-9.1390, 38.7139],
     "自由大道": [-9.1460, 38.7200]
   },
+  cityLandmarks: {
+    "马德里": [
+      { name: "普拉多博物馆", local: "Museo Nacional del Prado", coordinates: [-3.6921, 40.4138] },
+      { name: "丽池公园", local: "Parque del Retiro", coordinates: [-3.6822, 40.4153] }
+    ],
+    "萨拉戈萨": [
+      { name: "阿尔哈费里亚宫", local: "Palacio de la Aljafería", coordinates: [-0.9017, 41.6560] },
+      { name: "萨拉戈萨主教座堂", local: "Catedral del Salvador · La Seo", coordinates: [-0.8752, 41.6542] }
+    ],
+    "巴塞罗那": [
+      { name: "巴塞罗那哥特区", local: "Barri Gòtic", coordinates: [2.1760, 41.3830] },
+      { name: "加泰罗尼亚音乐宫", local: "Palau de la Música Catalana", coordinates: [2.1753, 41.3876] }
+    ],
+    "塔拉戈纳": [
+      { name: "塔拉戈纳罗马马戏场", local: "Circ Romà de Tarragona", coordinates: [1.2570, 41.1177] },
+      { name: "塔拉戈纳主教座堂", local: "Catedral de Tarragona", coordinates: [1.2582, 41.1199] }
+    ],
+    "佩尼斯科拉": [
+      { name: "佩尼斯科拉城堡", local: "Castillo de Peñíscola", coordinates: [0.4062, 40.3575] },
+      { name: "佩尼斯科拉灯塔", local: "Faro de Peñíscola", coordinates: [0.4065, 40.3571] }
+    ],
+    "瓦伦西亚": [
+      { name: "丝绸交易所", local: "La Lonja de la Seda", coordinates: [-0.3795, 39.4747] },
+      { name: "夸尔特塔", local: "Torres de Quart", coordinates: [-0.3832, 39.4787] }
+    ],
+    "格拉纳达": [
+      { name: "格拉纳达主教座堂", local: "Catedral de Granada", coordinates: [-3.5983, 37.1760] },
+      { name: "圣尼古拉斯观景台", local: "Mirador de San Nicolás", coordinates: [-3.5920, 37.1818] }
+    ],
+    "米哈斯": [
+      { name: "米哈斯斗牛场", local: "Plaza de Toros de Mijas", coordinates: [-4.6370, 36.5955] },
+      { name: "卡尔瓦里奥小教堂", local: "Ermita del Calvario", coordinates: [-4.6426, 36.5956] }
+    ],
+    "龙达": [
+      { name: "摩尔王宫", local: "Casa del Rey Moro", coordinates: [-5.1653, 36.7404] },
+      { name: "蒙德拉贡宫", local: "Palacio de Mondragón", coordinates: [-5.1663, 36.7406] }
+    ],
+    "塞维利亚": [
+      { name: "都市阳伞", local: "Metropol Parasol · Las Setas", coordinates: [-5.9903, 37.3930] },
+      { name: "特里亚纳市场", local: "Mercado de Triana", coordinates: [-6.0029, 37.3846] }
+    ],
+    "埃武拉": [
+      { name: "人骨礼拜堂", local: "Capela dos Ossos", coordinates: [-7.9118, 38.5701] },
+      { name: "吉拉尔多广场", local: "Praça do Giraldo", coordinates: [-7.9132, 38.5714] }
+    ],
+    "里斯本": [
+      { name: "圣乔治城堡", local: "Castelo de São Jorge", coordinates: [-9.1335, 38.7139] },
+      { name: "阿尔法玛老城", local: "Alfama", coordinates: [-9.1323, 38.7113] }
+    ]
+  },
   foodCoordinates: {
     "Botín餐厅": { coordinates: [-3.7064, 40.4145], city: "马德里" },
     "圣米格尔市场": { coordinates: [-3.7094, 40.4153], city: "马德里" },
