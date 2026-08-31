@@ -1,0 +1,31 @@
+/* Detailed map labels appear only at city scale, so the whole-route view stays legible. */
+.poi-marker .map-marker-label,
+.highlight-marker .map-marker-label {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  display: none;
+  max-width: 104px;
+  padding: 2px 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  color: #17302e;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+  font: 700 9px/1.25 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.poi-marker .map-marker-label { border-bottom: 2px solid #2d6f91; }
+.highlight-marker .map-marker-label { border-bottom: 2px solid #368f6a; }
+
+#mobileMap.show-place-labels .poi-marker .map-marker-label,
+#mobileMap.show-place-labels .highlight-marker .map-marker-label { display: block; }
+
+@media (max-width: 360px) {
+  .poi-marker .map-marker-label,
+  .highlight-marker .map-marker-label { max-width: 88px; font-size: 8px; }
+}
