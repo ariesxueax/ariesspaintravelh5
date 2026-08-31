@@ -263,7 +263,7 @@
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为景点，黄点为吃与带走；每日行程标注早、午、晚餐。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#e6ae2d"></i>吃与带走</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为行程景点，绿点为城市代表景点，黄点为吃与带走；每日行程标注早、午、晚餐。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#368f6a"></i>城市代表景点</span><span><i style="background:#e6ae2d"></i>吃与带走</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
   }
 
   function citiesView() {
@@ -437,6 +437,8 @@
       cityNames.forEach(name => marker(name, C.cityCoordinates[name], "city-marker", name));
       allVisits.filter(visit => C.poiCoordinates[visit.nameZh]).forEach(visit => marker(visit.nameZh, C.poiCoordinates[visit.nameZh], "poi-marker", visit.city));
       Object.entries(C.foodCoordinates || {}).forEach(([name, place]) => marker(name, place.coordinates, "food-marker", place.city));
+      const visitedNames = new Set(allVisits.map(visit => visit.nameZh));
+      cityNames.forEach(city => (C.cityLandmarks?.[city] || []).filter(landmark => !visitedNames.has(landmark.name)).forEach(landmark => marker(landmark.name, landmark.coordinates, "highlight-marker", `${city} · ${landmark.local}`)));
       const bounds = coordinates.reduce((value, coordinate) => value.extend(coordinate), new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
       state.map.fitBounds(bounds, { padding: 38, duration: 0 });
       if (state.mapFocus) state.map.flyTo({ center: state.mapFocus, zoom: 14, duration: 700 });
@@ -448,7 +450,7 @@
     element.className = className;
     element.setAttribute("aria-label", name);
     if (className === "city-marker") element.innerHTML = `<span>${esc(name)}</span>`;
-    const color = className === "city-marker" ? "#c85b4d" : className === "food-marker" ? "#e6ae2d" : "#2d6f91";
+    const color = className === "city-marker" ? "#c85b4d" : className === "food-marker" ? "#e6ae2d" : className === "highlight-marker" ? "#368f6a" : "#2d6f91";
     element.style.cssText = `width:${className === "city-marker" ? 14 : 10}px;height:${className === "city-marker" ? 14 : 10}px;border:2px solid #fff;border-radius:50%;background:${color};box-shadow:0 1px 5px rgba(0,0,0,.28);padding:0;`;
     new mapboxgl.Marker({ element }).setLngLat(coordinates).setPopup(new mapboxgl.Popup({ offset: 14 }).setHTML(`<b>${esc(name)}</b><span>${esc(subtitle)}</span>`)).addTo(state.map);
   }
