@@ -1,0 +1,448 @@
+/* Spanish travel phrases, organized for quick reading on a phone. */
+.hero-actions { flex-wrap: wrap; }
+
+.hero-translation-button {
+  border-color: rgba(237, 210, 164, .72);
+  color: #fff7e8;
+}
+
+.translation-view {
+  padding-bottom: 0;
+  background: var(--cream);
+}
+
+.translation-header {
+  padding: 20px 18px 18px;
+  color: white;
+  background: var(--forest);
+}
+
+.translation-header .eyebrow { color: #edd2a4; }
+
+.translation-header h1 {
+  margin: 6px 0 5px;
+  font: 700 30px/1.12 Georgia, "Songti SC", serif;
+}
+
+.translation-header p {
+  max-width: 340px;
+  margin: 0;
+  color: rgba(255, 255, 255, .78);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.translation-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.translation-key span,
+.translation-key i,
+.translation-key b,
+.translation-key em {
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, .9);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.translation-scene-list { padding: 4px 18px 0; }
+
+.translation-scene {
+  padding: 23px 0 3px;
+  border-bottom: 1px solid var(--line);
+}
+
+.translation-scene-head {
+  display: grid;
+  grid-template-columns: 33px minmax(0, 1fr) 25px;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 11px;
+}
+
+.translation-scene-head > span {
+  color: var(--coral);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.translation-scene-head small {
+  display: block;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.translation-scene-head h2 {
+  margin: 3px 0 0;
+  color: var(--forest);
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.translation-scene-head svg {
+  width: 21px;
+  height: 21px;
+  color: var(--forest);
+  stroke-width: 1.7;
+}
+
+.translation-phrase {
+  padding: 11px 0 12px;
+  border-top: 1px solid #e5e6df;
+}
+
+.translation-speak {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 700 16px/1.34 Georgia, "Times New Roman", serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.translation-speak span { min-width: 0; }
+
+.translation-speak svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  color: #aa8a57;
+  stroke-width: 1.8;
+}
+
+.translation-speak:focus-visible {
+  outline: 2px solid rgba(200, 91, 77, .55);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.translation-speak.is-speaking { color: var(--coral); }
+
+.translation-speak.is-speaking svg {
+  color: var(--coral);
+  animation: translation-sound-pulse .72s ease-in-out infinite alternate;
+}
+
+.translation-speak.speech-unavailable { color: #a1725d; }
+
+@keyframes translation-sound-pulse {
+  from { transform: scale(.9); opacity: .58; }
+  to { transform: scale(1.12); opacity: 1; }
+}
+
+.translation-meaning {
+  margin: 4px 0 0;
+  color: var(--forest);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.translation-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 11px;
+  margin: 8px 0 0;
+}
+
+.translation-detail div { min-width: 0; }
+
+.translation-detail dt {
+  color: #8a928c;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.translation-detail dd {
+  margin: 3px 0 0;
+  color: #45544f;
+  font-size: 11px;
+  line-height: 1.48;
+  word-break: break-word;
+}
+
+.translation-numbers {
+  padding: 12px 0 14px;
+  border-top: 1px solid #e5e6df;
+}
+
+.translation-numbers-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.translation-numbers-head b {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.translation-numbers-head span {
+  color: #8a928c;
+  font-size: 10px;
+}
+
+.translation-number-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+  border-top: 1px dashed #d7dad2;
+}
+
+.number-pronunciation {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 14px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 5px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 0 7px;
+  border: 0;
+  border-bottom: 1px solid #e5e6df;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.number-pronunciation strong {
+  grid-row: 1 / -1;
+  color: var(--coral);
+  font: 700 17px/1 Georgia, serif;
+}
+
+.number-pronunciation > span {
+  min-width: 0;
+  font: 700 14px/1.25 Georgia, "Times New Roman", serif;
+}
+
+.number-pronunciation > svg {
+  width: 13px;
+  height: 13px;
+  color: #aa8a57;
+  stroke-width: 1.8;
+}
+
+.number-pronunciation small {
+  grid-column: 2 / -1;
+  margin-top: 2px;
+  color: #77827d;
+  font-size: 9px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.number-pronunciation:focus-visible {
+  outline: 2px solid rgba(200, 91, 77, .55);
+  outline-offset: -2px;
+}
+
+.number-pronunciation.is-speaking { color: var(--coral); }
+
+.number-pronunciation.is-speaking > svg {
+  color: var(--coral);
+  animation: translation-sound-pulse .72s ease-in-out infinite alternate;
+}
+
+.number-pronunciation.speech-unavailable { color: #a1725d; }
+
+.translation-epilogue {
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 9px solid #e1e4dc;
+}
+
+.translation-epilogue-label {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 18px 16px;
+  color: var(--gold);
+}
+
+.translation-epilogue-label span {
+  flex: 1;
+  height: 1px;
+  background: #d7c8af;
+}
+
+.translation-epilogue-label b {
+  flex: 0 0 auto;
+  font: 700 13px/1 Georgia, "Songti SC", serif;
+  letter-spacing: .08em;
+}
+
+@media (max-width: 360px) {
+  .hero-actions { gap: 7px; }
+  .primary-button,
+  .secondary-button { padding: 0 11px; font-size: 13px; }
+  .translation-detail { gap: 8px; }
+  .translation-detail dd { font-size: 10px; }
+  .translation-number-grid { column-gap: 11px; }
+  .number-pronunciation small { font-size: 8px; }
+}
+
+/* Long-form spot guidance stays scannable inside the mobile detail sheet. */
+.spot-guide-body { padding: 0 18px 24px; }
+
+.spot-guide-body > .tag-row { margin: 16px 0 0; }
+
+.spot-guide-body .spot-facts { margin: 13px 0 4px; }
+
+.spot-guide-section {
+  border-top: 1px solid var(--line);
+}
+
+.spot-guide-section:first-of-type { border-top: 0; }
+
+.spot-guide-section summary {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.spot-guide-section summary::-webkit-details-marker { display: none; }
+
+.spot-guide-section summary > span {
+  color: var(--coral);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.spot-guide-section summary > b {
+  color: var(--forest);
+  font-size: 15px;
+}
+
+.spot-guide-section summary > svg {
+  width: 17px;
+  height: 17px;
+  color: var(--muted);
+  transition: transform .18s ease;
+}
+
+.spot-guide-section[open] summary > svg { transform: rotate(180deg); }
+
+.spot-guide-section summary:focus-visible {
+  outline: 2px solid rgba(200, 91, 77, .55);
+  outline-offset: -3px;
+}
+
+.spot-guide-copy {
+  display: grid;
+  gap: 10px;
+  padding: 0 0 17px;
+}
+
+.spot-guide-copy p {
+  margin: 0;
+  color: #3c4b47;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.spot-guide-copy p > b { color: var(--forest); }
+
+.spot-name-card {
+  padding: 11px 12px;
+  border-left: 3px solid var(--gold);
+  color: #4d4940 !important;
+  background: #f1eee6;
+  font: 700 14px/1.65 Georgia, "Songti SC", serif !important;
+}
+
+.spot-services {
+  padding-top: 4px;
+}
+
+.spot-services-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.spot-services-head b {
+  color: var(--forest);
+  font-size: 13px;
+}
+
+.spot-services-head span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.spot-services > p {
+  margin: 5px 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.spot-service-links {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
+.spot-service-links a {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  border-bottom: 1px solid var(--line);
+  color: var(--forest);
+  text-decoration: none;
+}
+
+.spot-service-links a > svg {
+  width: 15px;
+  height: 15px;
+  color: #b18442;
+}
+
+.spot-service-links a > span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.spot-service-links a > small {
+  color: var(--muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.spot-service-links a:focus-visible {
+  outline: 2px solid rgba(200, 91, 77, .55);
+  outline-offset: -2px;
+}
+
+.spot-guide-body .spot-notice {
+  margin-top: 16px;
+}
+
+.spot-guide-body .sheet-map-link { margin-top: 18px; }
