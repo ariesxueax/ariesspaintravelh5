@@ -1,5 +1,6 @@
 (async function () {
   const C = window.ROADBOOK_CONTENT;
+  const G = window.ROADBOOK_SPOT_GUIDES || { spots: {} };
   const app = document.getElementById("app");
   const topbar = document.getElementById("topbar");
   const tabbar = document.getElementById("tabbar");
@@ -351,13 +352,70 @@
     }
   }
 
+  function spotCategory(kind) {
+    const categories = {
+      interior: { hours: "按预约或官方当日开放时段入场，时段与安检规则会随季节、礼仪活动调整。", tickets: "建议提前预约；团队票、登塔或特展常与常规参观分时管理。", facilities: "洗手间、休息座椅和无障碍入口通常集中在检票区或出口附近，以现场导览图为准。", safety: "进出狭窄展厅时不要逆行；石阶、木地板和人流交汇处放慢脚步。", protection: "不触摸壁画、织物、石雕和宗教陈设；馆内拍摄、闪光灯与自拍杆以现场规则为准。" },
+      sacred: { hours: "礼拜、弥撒与参观常分开安排；开放时间和着装要求以门口当天公告为准。", tickets: "外观通常无需预约；登塔、博物馆或特别区域可能单独售票或限流。", facilities: "洗手间多在附属博物馆、游客服务点或广场周边；无障碍入口请按标识寻找。", safety: "礼拜开始前后人流会集中，进入时降低音量，石阶和地面在雨后易滑。", protection: "尊重祈祷区，不跨越围栏；避免露肩、过短下装与闪光灯拍摄。" },
+      food: { hours: "按餐厅当天营业时段与团队桌次执行，午晚餐高峰常需排队。", tickets: "无需门票；过敏原、素食和忌口请在落座前告知领队或服务人员。", facilities: "洗手间在店内，行李不要堵住通道；座位与饮水服务以场馆安排为准。", safety: "热盘、热汤和拥挤通道注意烫伤与碰撞；个人药物与过敏信息随身保留。", protection: "尊重餐厅节奏，减少一次性浪费；对传统食材保持开放，但不勉强食用。" },
+      shopping: { hours: "通常按零售日间时段开放，节假日、促销日和集合安排可能改变实际停留节奏。", tickets: "无需门票；先确认集合时间，再决定购物、咖啡或替代散步路线。", facilities: "洗手间与休息区多在服务台、餐饮区或商场公共区；无障碍路线按现场标识。", safety: "保管护照、手机和购物袋，不在收银区外展示现金；离开前再次核对集合点。", protection: "尊重店铺拍摄规定，不把公共通道当作拍摄布景。" },
+      performance: { hours: "以当日开演、入场与散场时间为准，通常需提前入座。", tickets: "本行程按包含项目与当天场馆安排执行，座位、饮品和入场规则听从领队通知。", facilities: "洗手间通常在入场前厅或中场休息区；演出开始后尽量不离座。", safety: "灯光转暗后注意台阶和桌椅，手机调至静音。", protection: "关闭闪光灯和提示音，不干扰演者与其他观众。" },
+      nature: { hours: "户外区域通常全天可看，但停车、游客中心和天气预警以当天公告为准。", tickets: "多数外观无需门票；恶劣天气、封路或强风时应接受临时调整。", facilities: "洗手间、休息处与饮水补给集中在停车区或游客中心，进入步道前先使用。", safety: "严格留在护栏与标示步道内，强风、湿滑和崖边是首要风险。", protection: "不翻越围栏、不采摘植物、不向海崖或水体抛掷物品。" },
+      outdoor: { hours: "公共外观区域通常可自由步行；活动、施工或节庆时以现场管理为准。", tickets: "外观无需预约；如临时入馆或登塔，按官方当日售票与限流规则处理。", facilities: "洗手间多在游客中心、博物馆、咖啡馆或广场外缘，提前留意位置。", safety: "石板路、台阶和车行道交界处慢行；人流密集区看管好随身物品。", protection: "不攀爬雕像、喷泉、城墙或遗址，不在文物表面刻画、张贴。" }
+    };
+    return categories[kind] || categories.outdoor;
+  }
+
+  function classifySpot(visit) {
+    const modes = visit?.modes || [];
+    if (modes.includes("food")) return "food";
+    if (modes.includes("shopping")) return "shopping";
+    if (modes.includes("show")) return "performance";
+    if (modes.includes("inside")) return "interior";
+    return "outdoor";
+  }
+
+  function googleMapsSearchUrl(query, coordinates) {
+    const [longitude, latitude] = coordinates || [-3.7038, 40.4168];
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${query} near ${latitude},${longitude}`)}`;
+  }
+
+  function guideSection(index, title, body, open = false) {
+    return `<details class="spot-guide-section"${open ? " open" : ""}><summary><span>${String(index).padStart(2, "0")}</span><b>${esc(title)}</b><i data-lucide="chevron-down" aria-hidden="true"></i></summary><div class="spot-guide-copy">${body}</div></details>`;
+  }
+
+  function googleServiceLinks(name, city, coordinates) {
+    const local = localSpotName(name) || name;
+    const locale = localCityName(city) || city;
+    const localDining = googleMapsSearchUrl(`top rated local restaurant within 1 km of ${local}`, coordinates);
+    const casualDining = googleMapsSearchUrl(`top rated cafe or casual restaurant within 1 km of ${local}`, coordinates);
+    const supermarket = googleMapsSearchUrl(`nearest supermarket within 1 km of ${local}`, coordinates);
+    return `<section class="spot-services"><div class="spot-services-head"><b>附近 1km 服务</b><span>Google Maps 实时排序</span></div><p>评分、营业状态和距离会实时变化，打开后请确认筛选范围为“距离”和“评分最高”。</p><div class="spot-service-links"><a href="${esc(localDining)}" target="_blank" rel="noopener"><i data-lucide="utensils"></i><span>高分本地餐厅</span><small>${esc(locale)}</small></a><a href="${esc(casualDining)}" target="_blank" rel="noopener"><i data-lucide="coffee"></i><span>高分轻食 / 咖啡</span><small>${esc(locale)}</small></a><a href="${esc(supermarket)}" target="_blank" rel="noopener"><i data-lucide="shopping-basket"></i><span>最近商超</span><small>${esc(locale)}</small></a></div></section>`;
+  }
+
   function openSpot(name, city) {
     const visit = cityVisits(city).find(item => item.nameZh === name) || allVisits.find(item => item.nameZh === name);
-    const profile = C.cities[city];
+    const profile = C.cities[city] || {};
+    const guide = G.spots[name] || {};
+    const kind = guide.kind || classifySpot(visit);
+    const category = spotCategory(kind);
     const photoKey = imageKeyFor(name, city);
     const duration = minimumStayLabel(visit, visit?.modes.includes("food") ? "特色品尝" : "行程未标注");
+    const coordinates = C.poiCoordinates?.[name] || C.cityCoordinates?.[city];
     const notice = C.spotNotices?.[name];
-    sheetContent.innerHTML = `<section class="sheet-hero">${responsiveImage(photoKey, name, { loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px", fallbackKey: imageKeyFor("", city) })}<h2>${esc(name)}<span class="sheet-local-name">${esc(localSpotName(name))}</span></h2></section><section class="sheet-body"><div class="tag-row">${modeTags(visit?.modes || [])}</div><div class="spot-facts"><div><b>${esc(city)}</b><span>所在城市</span></div><div><b>${esc(duration)}</b><span>游览时长</span></div><div><b>${visit?.modes.includes("inside") ? "含门票" : "按行程"}</b><span>参观方式</span></div></div>${notice ? `<section class="spot-notice"><h3>${esc(notice.title)}</h3><p>${esc(notice.text)}</p></section>` : ""}<h3>30 秒速览</h3><p>${esc(profile?.guide?.history || `${name}是本行程的重要停留节点。`)}</p><h3>在现场这样看</h3><p>${esc(profile?.guide?.route || "先观察整体空间，再把注意力放在建筑的材质、光线与人流交汇处。")}</p><h3>拍照与节奏</h3><p>${esc(profile?.guide?.photo || "避开正门人流，选择侧面光线与更低的机位，先看十秒再按快门。")}</p><button class="sheet-map-link" data-map-spot="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></section>`;
+    const cityGuide = profile.guide || {};
+    const overview = guide.position || `${city}行程节点，位于团队当天步行或车行路线内。`;
+    const story = guide.story || cityGuide.history || `${name}是${city}历史层次的重要观察点。`;
+    const people = guide.people || profile.architecture?.makers || "不同年代的建造者、居民与使用者共同塑造了这里。";
+    const culture = guide.culture || profile.architecture?.style || profile.culture || "从空间、材料和日常使用中理解它的地方性。";
+    const focus = guide.focus || cityGuide.photo || "先看整体尺度，再寻找材质、纹样与光线变化。";
+    const route = guide.route || cityGuide.route || "按团队集合点进入，沿主要视线完成停留后回到指定出口。";
+    const honor = guide.honor || "本行程的重要文化与景观节点。";
+    const religion = kind === "sacred" ? "这里同时是参观地与仍在使用的宗教空间，礼拜、节庆和日常祈祷优先于旅游动线。" : kind === "food" ? "饮食习俗是地方文化的一部分，理解食材与餐桌礼节比只拍成品更有意思。" : kind === "performance" ? "表演传统来自持续的社区实践，现场即兴与观众礼仪同样构成文化的一部分。" : "它的文化意义不仅在外形，也在它如何被城市居民反复使用、纪念和保护。";
+    const seasonal = kind === "nature" ? "晴天视野远、风也更强；阴天和雾天请把安全放在照片之前。" : kind === "outdoor" || kind === "shopping" ? "清晨人流较少，傍晚光线更柔；雨后石板与金属栏杆会更滑。" : "开门初段与午后交接的人流通常较缓，室内光线和拍摄规则以现场为准。";
+    const nearby = guide.nearby || cityGuide.nearby || "时间充裕可按城市页的推荐继续串联附近街区与公共空间。";
+    const foodHint = profile.nearby?.slice(0, 2).map(([place]) => place).join("、") || "城市页“吃与带走”中的推荐";
+    const giftHint = profile.nearby?.[2]?.[0] || "当地工艺、食材与博物馆商店";
+    sheetContent.innerHTML = `<section class="sheet-hero">${responsiveImage(photoKey, name, { loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px", fallbackKey: imageKeyFor("", city) })}<h2>${esc(name)}<span class="sheet-local-name">${esc(localSpotName(name))}</span></h2></section><section class="sheet-body spot-guide-body"><div class="tag-row">${modeTags(visit?.modes || [])}</div><div class="spot-facts"><div><b>${esc(city)}</b><span>所在城市</span></div><div><b>${esc(duration)}</b><span>行程停留</span></div><div><b>${esc(visit?.modes.includes("inside") ? "预约 / 入内" : "按行程外观")}</b><span>参观方式</span></div></div>${guideSection(1, "总览", `<p><b>地理位置：</b>${esc(overview)}</p><p><b>开放与票务：</b>${esc(category.hours)}</p><p><b>身份与荣誉：</b>${esc(honor)}</p><p class="spot-name-card">“${esc(guide.card || `${name}，是理解${city}的一扇现场窗口。`)}”</p>`, true)}${guideSection(2, "历史背景与人物故事", `<p><b>年代与脉络：</b>${esc(story)}</p><p><b>关键人物与趣闻：</b>${esc(people)}</p><p><b>与大历史的关联：</b>${esc(culture)}</p>`)}${guideSection(3, "文化内涵与象征意义", `<p><b>建筑与艺术：</b>${esc(culture)}</p><p><b>信仰 / 民俗：</b>${esc(religion)}</p><p><b>当代价值：</b>${esc(honor)}</p>`)}${guideSection(4, "景观特色与看点", `<p><b>重点打卡：</b>${esc(focus)}</p><p><b>细节看点：</b>先从整体轮廓退一步观察，再靠近看材质、文字、纹样或结构交接；这些细节常比“正面全景”更能说明它为什么在这里。</p><p><b>晨昏与天气：</b>${esc(seasonal)}</p>`)}${guideSection(5, "游览实用信息与路线", `<p><b>推荐路线：</b>${esc(route)}</p><p><b>时间分配：</b>行程标注${esc(duration)}；先完成主视角与核心细节，再决定是否增加周边停留。</p><p><b>休息与设施：</b>${esc(category.facilities)}</p><p><b>票务与排队：</b>${esc(category.tickets)}</p>`)}${guideSection(6, "安全提示与文明游览", `<p><b>行程安全：</b>${esc(category.safety)}</p><p><b>文物与环境保护：</b>${esc(category.protection)}</p><p><b>集合与联络：</b>集合点、返程时间和领队电话以当天群通知为准；紧急情况可拨打西班牙、葡萄牙通用紧急电话 112。</p>`)}${guideSection(7, "地方特产与周边服务", `<p><b>特色餐饮：</b>${esc(foodHint)}；下方入口会按当前位置打开 Google Maps 的实时高分结果。</p><p><b>文创与伴手礼：</b>${esc(giftHint)}；优先选择有产地、成分和价格标识的店铺，避免无来源的“手作”标签。</p><p><b>顺路联动：</b>${esc(nearby)}</p>${googleServiceLinks(name, city, coordinates)}`, true)}${notice ? `<section class="spot-notice"><h3>${esc(notice.title)}</h3><p>${esc(notice.text)}</p></section>` : ""}<button class="sheet-map-link" data-map-spot="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在路书地图中查看景点</button></section>`;
     sheet.showModal();
     refreshIcons();
     const citySpots = cityVisits(city);
