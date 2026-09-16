@@ -1,0 +1,89 @@
+/* Architectural analysis is a separate, scrollable sheet within every spot detail. */
+.sheet-analysis-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 18px;
+  border: 1px solid #b4884f;
+  border-radius: 5px;
+  color: var(--forest);
+  background: #f6f1e6;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sheet-analysis-link svg { width: 16px; height: 16px; color: #a47638; }
+.spot-guide-body .sheet-map-link { margin-top: 10px; }
+
+.analysis-sheet { padding: 18px 18px 26px; }
+
+.analysis-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 18px;
+}
+
+.analysis-header > div { min-width: 0; }
+
+.analysis-header span {
+  display: block;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.analysis-header h2 {
+  margin: 5px 0 0;
+  color: var(--forest);
+  font: 700 24px/1.18 Georgia, "Songti SC", serif;
+}
+
+.analysis-header h2 small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font: 700 11px/1.3 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+.analysis-back {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--forest);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.analysis-back svg { width: 14px; height: 14px; }
+
+.analysis-figure { margin: 0; }
+.analysis-figure img { width: 100%; height: auto; border: 1px solid var(--line); }
+.analysis-figure figcaption { margin-top: 8px; color: var(--muted); font-size: 10px; text-align: right; }
+
+.analysis-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 48px 22px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  text-align: center;
+}
+
+.analysis-empty svg { width: 28px; height: 28px; color: var(--gold); }
+.analysis-empty b { color: var(--forest); font-size: 15px; }
+.analysis-empty p { max-width: 240px; margin: 0; font-size: 12px; line-height: 1.6; }
