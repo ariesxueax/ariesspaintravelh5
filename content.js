@@ -382,6 +382,12 @@ window.ROADBOOK_CONTENT = {
     "塞维利亚西班牙广场": "plaza-espana-seville", "塞维利亚大王宫": "alcazar-seville", "塞维利亚大教堂": "seville-cathedral", "黄金塔": "torre-del-oro", "塞维利亚圆形竞技场": "seville",
     "埃武拉城区": "evora-old-town", "埃武拉罗马神庙": "roman-temple-evora", "埃武拉大教堂": "evora-cathedral", "罗卡角与经纬度纪念碑": "cabo-da-roca", "贝伦塔": "belem-tower-new", "航海发现纪念碑": "discoveries-monument-new", "圣热罗尼姆修道院和教堂": "jeronimos-new", "4月25日大桥": "april-bridge-new", "罗西奥广场": "rossio-new", "自由大道": "avenida-liberdade-new", "百年老店葡式蛋挞": "pasteis-belem-new", "葡萄牙鳕鱼餐": "bacalhau-new"
   },
+  architecturalAnalyses: {
+    "圣家族大教堂": {
+      image: "assets/analysis/sagrada-familia-architectural-analysis.png",
+      source: "用户提供"
+    }
+  },
   phrases: [
     ["Hola", "[ˈola]", "哦啦", "你好"], ["Buenos días", "[ˈbwenos ˈdi.as]", "布埃诺斯 迪阿斯", "早上好"],
     ["Buenas tardes", "[ˈbwenas ˈtaɾðes]", "布埃纳斯 塔尔德斯", "下午好"], ["Buenas noches", "[ˈbwenas ˈnotʃes]", "布埃纳斯 诺切斯", "晚上好"],
