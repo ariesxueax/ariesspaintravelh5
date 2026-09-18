@@ -383,6 +383,18 @@ window.ROADBOOK_CONTENT = {
     "埃武拉城区": "evora-old-town", "埃武拉罗马神庙": "roman-temple-evora", "埃武拉大教堂": "evora-cathedral", "罗卡角与经纬度纪念碑": "cabo-da-roca", "贝伦塔": "belem-tower-new", "航海发现纪念碑": "discoveries-monument-new", "圣热罗尼姆修道院和教堂": "jeronimos-new", "4月25日大桥": "april-bridge-new", "罗西奥广场": "rossio-new", "自由大道": "avenida-liberdade-new", "百年老店葡式蛋挞": "pasteis-belem-new", "葡萄牙鳕鱼餐": "bacalhau-new"
   },
   architecturalAnalyses: {
+    "马德里皇宫": {
+      image: "assets/analysis/royal-palace-madrid-architectural-analysis.jpg",
+      source: "用户提供"
+    },
+    "巴特罗之家": {
+      image: "assets/analysis/casa-batllo-architectural-analysis.png",
+      source: "用户提供"
+    },
+    "米拉之家": {
+      image: "assets/analysis/casa-mila-architectural-analysis.png",
+      source: "用户提供"
+    },
     "圣家族大教堂": {
       image: "assets/analysis/sagrada-familia-architectural-analysis.png",
       source: "用户提供"
