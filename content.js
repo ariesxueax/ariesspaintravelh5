@@ -410,6 +410,10 @@ window.ROADBOOK_CONTENT = {
     "圣家族大教堂": {
       image: "assets/analysis/sagrada-familia-architectural-analysis.png",
       source: "用户提供"
+    },
+    "塞维利亚西班牙广场": {
+      image: "assets/analysis/plaza-espana-seville-architectural-analysis.png",
+      source: "用户提供"
     }
   },
   phrases: [
