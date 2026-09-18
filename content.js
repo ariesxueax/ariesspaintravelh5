@@ -412,7 +412,7 @@ window.ROADBOOK_CONTENT = {
       source: "用户提供"
     },
     "塞维利亚西班牙广场": {
-      image: "assets/analysis/plaza-espana-seville-architectural-analysis.png",
+      image: "assets/analysis/plaza-espana-seville-architectural-analysis.jpg",
       source: "用户提供"
     }
   },
