@@ -10,7 +10,7 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json").then(response => {
+  const itinerary = await fetch("data/itinerary-extraction.json?v=9.6").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
   });
@@ -245,7 +245,7 @@
   }
 
   function itineraryView() {
-    return `<section class="view itinerary-view"><header class="itinerary-header"><div class="eyebrow">Day by day</div><h1>每日行程</h1><p>把每天的移动、停留和城市节奏，放在一条连续路线里阅读。</p><div class="itinerary-stats"><span>11 天</span><span>12 城</span><span>44 个节点</span></div></header><div class="itinerary-flow">${itinerary.days.map(day => dayCard(day)).join("")}</div></section>`;
+    return `<section class="view itinerary-view"><header class="itinerary-header"><div class="eyebrow">Day by day</div><h1>每日行程</h1><p>把每天的移动、停留和城市节奏，放在一条连续路线里阅读。</p><div class="itinerary-stats"><span>11 天</span><span>12 城</span><span>45 个节点</span></div></header><div class="itinerary-flow">${itinerary.days.map(day => dayCard(day)).join("")}</div></section>`;
   }
 
   function dayCard(day) {
@@ -296,7 +296,7 @@
       return `<label class="check-row ${savedChecks[id] ? "done" : ""}"><input type="checkbox" data-check="${esc(id)}" ${savedChecks[id] ? "checked" : ""}><span>${esc(item)}</span></label>`;
     }).join("");
     const subtitle = active === "汇率转换" ? "自动读取 EUR/CNY 日参考汇率，也可手动修改。" : "勾选会保留在当前设备，出发前可随时核对。";
-    const content = active === "汇率转换" ? exchangeTool() : `${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/29 00:30 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div>`;
+    const content = active === "汇率转换" ? exchangeTool() : `${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/30 00:35 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div>`;
     return `<section class="view checklist-view"><header class="checklist-header"><div class="eyebrow">Ready to go</div><h1>旅行清单</h1><p>${subtitle}</p></header><div class="checklist-tabs">${Object.keys(checkSections).map(name => `<button class="check-tab ${active === name ? "active" : ""}" data-check-section="${name}">${name}</button>`).join("")}</div><div class="check-panel">${content}</div></section>`;
   }
 
