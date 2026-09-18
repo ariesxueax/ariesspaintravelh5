@@ -1,12 +1,12 @@
 {
   "source": {
-    "file": "行程单 260929VII杭州西葡全四包团WFF-质品杭州西班牙葡萄牙11天8晚（JD）MADLIS（4钻）1671847.pdf",
-    "tourCode": "ETI-SHAPOZXX-260929-07",
-    "title": "杭州西班牙+葡萄牙11天8晚",
+    "file": "待告版（签证未出）9.29西班牙葡萄牙8晚11日 出团通知.pdf",
+    "tourCode": "XC-EU260929ZJF",
+    "title": "质品杭州西班牙葡萄牙8晚11日",
     "departureDate": "2026-09-29",
     "returnDate": "2026-10-09",
     "countries": ["中国", "西班牙", "葡萄牙"],
-    "extractionStatus": "verified-against-rendered-pages"
+    "extractionStatus": "verified-against-extracted-itinerary-pages"
   },
   "visitModeLegend": {
     "flight": "国际航班",
@@ -59,7 +59,7 @@
       "meals": {"breakfast": "×", "lunch": "含", "dinner": "含"},
       "transport": ["flight", "coach"],
       "segments": [
-        {"from": "杭州", "to": "马德里", "mode": "flight", "distanceKm": null, "duration": "约13小时30分", "reference": "JD605 00:30-08:00（当地时间）"},
+        {"from": "杭州", "to": "马德里", "mode": "flight", "distanceKm": null, "duration": "00:35 / 08:35（当地时间）", "reference": "JD605 杭州萧山机场T4 - 马德里巴拉哈斯机场，00:35/08:35"},
         {"from": "马德里", "to": "萨拉戈萨", "mode": "coach", "distanceKm": 325, "duration": null, "reference": "原文：大巴约325公里"}
       ],
       "visits": [
@@ -84,9 +84,9 @@
       "visits": [
         {"city": "巴塞罗那", "nameZh": "国家宫", "nameEn": "Palau Nacional", "modes": ["outside"], "minimumDurationMinutes": 15},
         {"city": "巴塞罗那", "nameZh": "哥伦布广场纪念碑", "nameEn": "Columbus Monument, Barcelona", "modes": ["walk"], "minimumDurationMinutes": 15},
-        {"city": "巴塞罗那", "nameZh": "米拉之家", "nameEn": "Casa Mila", "modes": ["outside"], "minimumDurationMinutes": 15},
         {"city": "巴塞罗那", "nameZh": "巴特罗之家", "nameEn": "Casa Batllo", "modes": ["outside"], "minimumDurationMinutes": 15},
-        {"city": "巴塞罗那", "nameZh": "感恩大道", "nameEn": "Passeig de Gracia", "modes": ["walk", "shopping"], "minimumDurationMinutes": 90}
+        {"city": "巴塞罗那", "nameZh": "感恩大道", "nameEn": "Passeig de Gracia", "modes": ["walk", "shopping"], "minimumDurationMinutes": 90},
+        {"city": "巴塞罗那", "nameZh": "奎尔公园", "nameEn": "Park Guell", "modes": ["inside", "guided"], "minimumDurationMinutes": 60}
       ]
     },
     {
@@ -98,8 +98,8 @@
       "transport": ["coach"],
       "segments": [],
       "visits": [
-        {"city": "巴塞罗那", "nameZh": "圣家族大教堂", "nameEn": "Sagrada Familia", "modes": ["inside", "guided"], "minimumDurationMinutes": 60},
-        {"city": "巴塞罗那", "nameZh": "奎尔公园", "nameEn": "Park Guell", "modes": ["inside", "guided"], "minimumDurationMinutes": 60},
+        {"city": "巴塞罗那", "nameZh": "圣家族大教堂", "nameEn": "Sagrada Familia", "modes": ["outside"], "minimumDurationMinutes": 15, "notes": "当前为外观；若团队票申请成功，优先改为入内参观，并将米拉之家调整为外观。"},
+        {"city": "巴塞罗那", "nameZh": "米拉之家", "nameEn": "Casa Mila", "modes": ["inside", "guided"], "minimumDurationMinutes": 60, "notes": "当前为入内安排；若圣家族大教堂团队票申请成功，则改为外观。"},
         {"city": "巴塞罗那", "nameZh": "La Roca购物村", "nameEn": "La Roca Village", "modes": ["shopping", "free_time"], "minimumDurationMinutes": 150},
         {"city": "巴塞罗那", "nameZh": "西班牙海鲜饭", "nameEn": "Spanish paella", "modes": ["food"], "minimumDurationMinutes": null}
       ]
@@ -137,10 +137,8 @@
         {"from": "瓦伦西亚", "to": "格拉纳达", "mode": "coach", "distanceKm": 500, "duration": null, "reference": "原文：大巴约500公里"}
       ],
       "visits": [
-        {"city": "格拉纳达", "nameZh": "阿尔罕布拉宫", "nameEn": "Alhambra", "modes": ["inside", "guided"], "minimumDurationMinutes": 90, "reservationRequired": true},
-        {"city": "格拉纳达", "nameZh": "阿宫后花园", "nameEn": "Generalife", "modes": ["inside", "conditional"], "minimumDurationMinutes": null, "condition": "阿尔罕布拉宫预约未获批时的替代方案之一"},
-        {"city": "塞维利亚", "nameZh": "塞维利亚王宫", "nameEn": "Royal Alcazar of Seville", "modes": ["inside", "conditional"], "minimumDurationMinutes": null, "condition": "阿尔罕布拉宫预约未获批时的替代方案之一"},
-        {"city": "格拉纳达", "nameZh": "阿尔拜辛区", "nameEn": "Albaicin", "modes": ["free_time", "conditional"], "minimumDurationMinutes": 30, "condition": "阿尔罕布拉宫预约未获批时追加"}
+        {"city": "格拉纳达", "nameZh": "阿宫后花园", "nameEn": "Generalife", "modes": ["inside", "guided"], "minimumDurationMinutes": 90, "notes": "新版出团通知明确以阿宫后花园替代原定游览内容。"},
+        {"city": "格拉纳达", "nameZh": "阿尔拜辛区", "nameEn": "Albaicin", "modes": ["free_time"], "minimumDurationMinutes": 30, "notes": "新版出团通知增加自由活动约30分钟。"}
       ]
     },
     {
@@ -214,7 +212,7 @@
       "meals": {"breakfast": "含", "lunch": "×", "dinner": "×"},
       "transport": ["flight"],
       "segments": [
-        {"from": "里斯本", "to": "杭州", "mode": "flight", "distanceKm": null, "duration": "约13小时15分", "reference": "JD622 11:55-08:10+1（当地时间）"}
+        {"from": "里斯本", "to": "杭州", "mode": "flight", "distanceKm": null, "duration": "11:55 / 08:10+1（当地时间）", "reference": "JD622 里斯本波尔特拉机场T1 - 杭州萧山机场T4，11:55/08:10+1"}
       ],
       "visits": []
     },
@@ -231,9 +229,10 @@
     }
   ],
   "extractionNotes": [
-    "PDF注明城市间公里数为直线距离，仅供参考；大巴耗时未在原文给出，当前保留为null，后续地图阶段再按道路路线计算。",
+    "出团通知注明城市间公里数仅供参考；大巴耗时未在原文给出，H5按照既定口径以75km/h换算显示。",
     "未出现‘入内/外观/远观’字样但明确给出游览时长的开放空间，统一标为walk，不擅自推断购票入内。",
     "杭州作为起点和终点在routeNodes中分别保留，便于地图绘制闭合路线。",
-    "La Roca购物村是购物点，不作为路线城市红点；阿尔罕布拉宫替代项目不作为默认路线蓝点。"
+    "La Roca购物村是购物点，不作为路线城市红点；D6默认景点为阿宫后花园与阿尔拜辛区。",
+    "D4当前安排为圣家族大教堂外观、米拉之家入内；若团队票申请成功，按出团通知改为圣家族大教堂入内、米拉之家外观。"
   ]
 }
