@@ -1,0 +1,225 @@
+/* Hotels from the departure notice are red, with a bed icon to distinguish them from city dots. */
+.hotel-marker svg {
+  width: 10px;
+  height: 10px;
+  color: #fff;
+  stroke-width: 2.6;
+  pointer-events: none;
+}
+
+.mapboxgl-popup-content small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.mapboxgl-popup-content .map-popup-source {
+  color: #64716b;
+}
+
+.route-hotel-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 9px;
+  border: 1px solid #ead4cf;
+  border-radius: 4px;
+  color: #783e35;
+  background: #fcf4f1;
+  text-align: left;
+}
+
+.route-hotel-link > svg:first-child {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  color: #c85b4d;
+}
+
+.route-hotel-link > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.route-hotel-link span small {
+  margin: 0 0 2px;
+  color: #a16055;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.route-hotel-link span b {
+  overflow: hidden;
+  display: block;
+  color: #66362e;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route-hotel-link > svg:last-child {
+  width: 14px;
+  height: 14px;
+  color: #b98a82;
+}
+
+.hotel-sheet-header {
+  padding: 28px 18px 18px;
+  color: white;
+  background: #703d34;
+}
+
+.hotel-sheet-header .eyebrow {
+  color: #f1c7a0;
+}
+
+.hotel-sheet-header h2 {
+  margin: 7px 0 6px;
+  font: 700 24px/1.2 Georgia, "Songti SC", serif;
+}
+
+.hotel-sheet-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, .75);
+  font-size: 12px;
+}
+
+.hotel-sheet-body {
+  padding: 18px;
+}
+
+.hotel-facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.hotel-facts div {
+  min-width: 0;
+  padding: 10px;
+  background: var(--paper);
+}
+
+.hotel-facts b {
+  overflow: hidden;
+  display: block;
+  color: var(--forest);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hotel-facts span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.hotel-intro,
+.hotel-live {
+  margin-top: 18px;
+}
+
+.hotel-sheet-body h3 {
+  margin: 0 0 7px;
+  color: var(--forest);
+  font-size: 15px;
+}
+
+.hotel-sheet-body p {
+  margin: 0;
+  color: #3c4b47;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.hotel-address {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+}
+
+.hotel-address svg {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  color: #c85b4d;
+}
+
+.hotel-live {
+  padding-top: 17px;
+  border-top: 1px solid var(--line);
+}
+
+.hotel-live-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hotel-live-head span {
+  color: #a47638;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.hotel-map-button,
+.hotel-nearby-links a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  color: white;
+  background: var(--forest);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.hotel-map-button {
+  justify-content: center;
+  margin-top: 11px;
+  border-radius: 4px;
+}
+
+.hotel-map-button svg,
+.hotel-nearby-links svg {
+  width: 15px;
+  height: 15px;
+}
+
+.hotel-nearby-links {
+  display: grid;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.hotel-nearby-links a {
+  padding: 0 12px;
+  border: 1px solid #dce2da;
+  border-radius: 4px;
+  color: var(--forest);
+  background: #f3f6f1;
+}
+
+.hotel-source {
+  margin-top: 18px !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+  line-height: 1.55 !important;
+}
