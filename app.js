@@ -263,7 +263,7 @@
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，蓝点为行程景点，绿点为城市代表景点；放大至城市尺度可查看景点名称标签。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#368f6a"></i>城市代表景点</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，红色床位点为入住酒店，蓝点为行程景点，绿点为城市代表景点；放大至城市尺度可查看景点名称标签。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#c85b4d"></i>入住酒店</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#368f6a"></i>城市代表景点</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
   }
 
   function citiesView() {
@@ -448,6 +448,8 @@
       allVisits.filter(visit => C.poiCoordinates[visit.nameZh]).forEach(visit => marker(visit.nameZh, C.poiCoordinates[visit.nameZh], "poi-marker", visit.city));
       const visitedNames = new Set(allVisits.map(visit => visit.nameZh));
       cityNames.forEach(city => (C.cityLandmarks?.[city] || []).filter(landmark => !visitedNames.has(landmark.name)).forEach(landmark => marker(landmark.name, landmark.coordinates, "highlight-marker", `${city} · ${landmark.local}`)));
+      (C.hotels || []).forEach(hotel => marker(hotel.name, hotel.coordinates, "hotel-marker", `${hotel.stay} · ${hotel.city}`, { address: hotel.address, source: hotel.source }));
+      refreshIcons();
       const bounds = coordinates.reduce((value, coordinate) => value.extend(coordinate), new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
       state.map.fitBounds(bounds, { padding: 38, duration: 0 });
       const updatePlaceLabelVisibility = () => mapContainer.classList.toggle("show-place-labels", state.map.getZoom() >= 7.5);
@@ -457,14 +459,18 @@
     });
   }
 
-  function marker(name, coordinates, className, subtitle) {
+  function marker(name, coordinates, className, subtitle, details = {}) {
     const element = document.createElement("button");
     element.className = className;
     element.setAttribute("aria-label", name);
     if (["city-marker", "poi-marker", "highlight-marker"].includes(className)) element.innerHTML = `<span class="map-marker-label">${esc(name)}</span>`;
-    const color = className === "city-marker" ? "#c85b4d" : className === "highlight-marker" ? "#368f6a" : "#2d6f91";
-    element.style.cssText = `width:${className === "city-marker" ? 14 : 10}px;height:${className === "city-marker" ? 14 : 10}px;border:2px solid #fff;border-radius:50%;background:${color};box-shadow:0 1px 5px rgba(0,0,0,.28);padding:0;`;
-    new mapboxgl.Marker({ element }).setLngLat(coordinates).setPopup(new mapboxgl.Popup({ offset: 14 }).setHTML(`<b>${esc(name)}</b><span>${esc(subtitle)}</span>`)).addTo(state.map);
+    if (className === "hotel-marker") element.innerHTML = '<i data-lucide="bed-double" aria-hidden="true"></i>';
+    const color = ["city-marker", "hotel-marker"].includes(className) ? "#c85b4d" : className === "highlight-marker" ? "#368f6a" : "#2d6f91";
+    const size = className === "hotel-marker" ? 18 : className === "city-marker" ? 14 : 10;
+    element.style.cssText = `display:grid;place-items:center;width:${size}px;height:${size}px;border:2px solid #fff;border-radius:50%;background:${color};box-shadow:0 1px 5px rgba(0,0,0,.28);padding:0;`;
+    const address = details.address ? `<small>${esc(details.address)}</small>` : "";
+    const source = details.source ? `<small class="map-popup-source">来源：${esc(details.source)}</small>` : "";
+    new mapboxgl.Marker({ element }).setLngLat(coordinates).setPopup(new mapboxgl.Popup({ offset: 14 }).setHTML(`<b>${esc(name)}</b><span>${esc(subtitle)}</span>${address}${source}`)).addTo(state.map);
   }
 
   function render() {
