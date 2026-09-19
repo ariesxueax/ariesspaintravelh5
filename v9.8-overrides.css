@@ -1,0 +1,21 @@
+/* Hotels from the departure notice are red, with a bed icon to distinguish them from city dots. */
+.hotel-marker svg {
+  width: 10px;
+  height: 10px;
+  color: #fff;
+  stroke-width: 2.6;
+  pointer-events: none;
+}
+
+.mapboxgl-popup-content small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.mapboxgl-popup-content .map-popup-source {
+  color: #64716b;
+}
