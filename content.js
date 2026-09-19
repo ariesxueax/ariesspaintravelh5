@@ -134,6 +134,15 @@ window.ROADBOOK_CONTENT = {
     "Cervejaria Ramiro": { coordinates: [-9.1374, 38.7256], city: "里斯本" },
     "Conserveira de Lisboa": { coordinates: [-9.1376, 38.7107], city: "里斯本" }
   },
+  hotels: [
+    { name: "B&B HOTEL Zaragoza Los Enlaces Estación", stay: "D2 · 09/30 · 1 晚", city: "萨拉戈萨", address: "C. de Pilar Miró, 1, 50011 Zaragoza, 西班牙", coordinates: [-0.9205993, 41.649236], source: "行程：出团通知第 2 页；坐标：Google Maps（2026-09-19）" },
+    { name: "Hotel Ciutat Martorell", stay: "D3-D4 · 10/01-10/02 · 2 晚", city: "马托雷尔（巴塞罗那近郊）", address: "Avinguda de Pau Claris, 08760 Martorell, Barcelona, 西班牙", coordinates: [1.9212783, 41.4787504], source: "行程：出团通知第 2 页；坐标：Google Maps（2026-09-19）" },
+    { name: "AZZ Valencia Táctica Hotel", stay: "D5 · 10/03 · 1 晚", city: "帕特纳（瓦伦西亚近郊）", address: "Carrer Botiguers, 1, 46980 Paterna, Valencia, 西班牙", coordinates: [-0.4521352, 39.5123482], source: "行程：出团通知第 2 页；坐标：Google Maps（2026-09-19）" },
+    { name: "Hotel Los Angeles", stay: "D6 · 10/04 · 1 晚", city: "格拉纳达", address: "Cta. Escoriaza, 17, Centro, 18008 Granada, 西班牙", coordinates: [-3.5886394, 37.1691763], source: "行程：出团通知第 2 页；坐标：Google Maps（2026-09-19）" },
+    { name: "Hotel YIT Via Sevilla Mairena", stay: "D7 · 10/05 · 1 晚", city: "迈雷纳-德尔阿尔哈拉费（塞维利亚近郊）", address: "Av. de los Descubrimientos, S/N, 41927 Mairena del Aljarafe, Sevilla, 西班牙", coordinates: [-6.0528989, 37.3492265], source: "行程：出团通知第 2 页；坐标：Google Maps（2026-09-19）" },
+    { name: "Évora Hotel", stay: "D8 · 10/06 · 1 晚", city: "埃武拉", address: "Avenida Túlio Espanca Apart. 93, 7002-502 Évora, 葡萄牙", coordinates: [-7.932754, 38.563646], source: "行程：出团通知第 2 页；坐标：Google Maps（2026-09-19）" },
+    { name: "VIP Executive Entrecampos Hotel & Conference", stay: "D9 · 10/07 · 1 晚", city: "里斯本", address: "Avenida 5 de Outubro 295, 1600-035 Lisboa, 葡萄牙", coordinates: [-9.1503845, 38.7470879], source: "行程：出团通知第 2 页；坐标：Google Maps（2026-09-19）" }
+  ],
   cityGuideHighlights: {
     "马德里": { style: "哈布斯堡旧城 · 波旁新古典", makers: "腓力二世 · 萨凯蒂 · 萨巴蒂尼" },
     "萨拉戈萨": { style: "罗马格网 · 穆德哈尔砖塔 · 巴洛克", makers: "戈雅 · 穆德哈尔砖工匠" },
