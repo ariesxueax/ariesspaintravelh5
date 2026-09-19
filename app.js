@@ -10,7 +10,7 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json?v=9.6").then(response => {
+  const itinerary = await fetch("data/itinerary-extraction.json?v=9.9").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
   });
@@ -263,7 +263,15 @@
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，红色床位点为入住酒店，蓝点为行程景点，绿点为城市代表景点；放大至城市尺度可查看景点名称标签。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#c85b4d"></i>入住酒店</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#368f6a"></i>城市代表景点</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，红色床位点为入住酒店，蓝点为行程景点，绿点为城市代表景点；放大至城市尺度可查看景点名称标签。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#c85b4d"></i>入住酒店</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#368f6a"></i>城市代表景点</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${hotelsForDay(day.day).map(hotelRouteLink).join("")}${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
+  }
+
+  function hotelsForDay(day) {
+    return (C.hotels || []).filter(hotel => hotel.days?.includes(day));
+  }
+
+  function hotelRouteLink(hotel) {
+    return `<button class="route-hotel-link" data-hotel="${esc(hotel.name)}" aria-label="查看 ${esc(hotel.name)} 的住宿信息"><i data-lucide="bed-double" aria-hidden="true"></i><span><small>入住</small><b>${esc(hotel.name)}</b></span><i data-lucide="chevron-right" aria-hidden="true"></i></button>`;
   }
 
   function citiesView() {
@@ -390,6 +398,18 @@
     const casualDining = googleMapsSearchUrl(`top rated cafe or casual restaurant within 1 km of ${local}`, coordinates);
     const supermarket = googleMapsSearchUrl(`nearest supermarket within 1 km of ${local}`, coordinates);
     return `<section class="spot-services"><div class="spot-services-head"><b>附近 1km 服务</b><span>Google Maps 实时排序</span></div><p>评分、营业状态和距离会实时变化，打开后请确认筛选范围为“距离”和“评分最高”。</p><div class="spot-service-links"><a href="${esc(localDining)}" target="_blank" rel="noopener"><i data-lucide="utensils"></i><span>高分本地餐厅</span><small>${esc(locale)}</small></a><a href="${esc(casualDining)}" target="_blank" rel="noopener"><i data-lucide="coffee"></i><span>高分轻食 / 咖啡</span><small>${esc(locale)}</small></a><a href="${esc(supermarket)}" target="_blank" rel="noopener"><i data-lucide="shopping-basket"></i><span>最近商超</span><small>${esc(locale)}</small></a></div></section>`;
+  }
+
+  function openHotel(name) {
+    const hotel = (C.hotels || []).find(item => item.name === name);
+    if (!hotel) return;
+    const maps = googleMapsSearchUrl(hotel.name, hotel.coordinates);
+    const dining = googleMapsSearchUrl(`top rated restaurant within 1 km of ${hotel.name}`, hotel.coordinates);
+    const shopping = googleMapsSearchUrl(`shopping mall or supermarket within 1 km of ${hotel.name}`, hotel.coordinates);
+    const nearby = googleMapsSearchUrl(`things to do within 1 km of ${hotel.name}`, hotel.coordinates);
+    sheetContent.innerHTML = `<section class="hotel-sheet"><header class="hotel-sheet-header"><div class="eyebrow">Hotel stay</div><h2>${esc(hotel.name)}</h2><p>${esc(hotel.stay)} · ${esc(hotel.city)}</p></header><section class="hotel-sheet-body"><div class="hotel-facts"><div><b>${esc(hotel.city)}</b><span>住宿区域</span></div><div><b>${esc(hotel.stay)}</b><span>行程住宿</span></div></div><section class="hotel-intro"><h3>酒店简介</h3><p>${esc(hotel.intro)}</p><p class="hotel-address"><i data-lucide="map-pin"></i><span>${esc(hotel.address)}</span></p></section><section class="hotel-live"><div class="hotel-live-head"><h3>实时评价</h3><span>Google Maps</span></div><p>评分、旅客评价、营业状态会变化，点击后查看当前信息。</p><a class="hotel-map-button" href="${esc(maps)}" target="_blank" rel="noopener"><i data-lucide="star"></i>查看酒店评分与评价</a></section><section class="hotel-live"><div class="hotel-live-head"><h3>酒店 1km 内</h3><span>实时推荐</span></div><p>以下入口以酒店定位为中心打开 Google Maps；请优先按“距离”和“评分最高”筛选。</p><div class="hotel-nearby-links"><a href="${esc(dining)}" target="_blank" rel="noopener"><i data-lucide="utensils"></i><span>高分饭店</span></a><a href="${esc(shopping)}" target="_blank" rel="noopener"><i data-lucide="shopping-bag"></i><span>购物中心 / 商超</span></a><a href="${esc(nearby)}" target="_blank" rel="noopener"><i data-lucide="map"></i><span>附近可逛</span></a></div></section><p class="hotel-source">来源：${esc(hotel.source)}；评分、评价及周边推荐：Google Maps 实时查询。</p></section></section>`;
+    sheet.showModal();
+    refreshIcons();
   }
 
   function openSpotAnalysis(name, city) {
@@ -546,6 +566,8 @@
     if (cityButton) { state.city = cityButton.dataset.cityPage; state.view = "city"; render(); return; }
     const spotButton = event.target.closest("[data-spot]");
     if (spotButton) { openSpot(spotButton.dataset.spot, spotButton.dataset.city); return; }
+    const hotelButton = event.target.closest("[data-hotel]");
+    if (hotelButton) { openHotel(hotelButton.dataset.hotel); return; }
     const analysisButton = event.target.closest("[data-spot-analysis]");
     if (analysisButton) { openSpotAnalysis(analysisButton.dataset.spotAnalysis, analysisButton.dataset.city); return; }
     const returnSpotButton = event.target.closest("[data-return-spot]");
