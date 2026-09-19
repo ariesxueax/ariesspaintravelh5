@@ -387,6 +387,10 @@
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${query} near ${latitude},${longitude}`)}`;
   }
 
+  function googleMapsPlaceUrl(name) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
+  }
+
   function guideSection(index, title, body, open = false) {
     return `<details class="spot-guide-section"${open ? " open" : ""}><summary><span>${String(index).padStart(2, "0")}</span><b>${esc(title)}</b><i data-lucide="chevron-down" aria-hidden="true"></i></summary><div class="spot-guide-copy">${body}</div></details>`;
   }
@@ -403,7 +407,7 @@
   function openHotel(name) {
     const hotel = (C.hotels || []).find(item => item.name === name);
     if (!hotel) return;
-    const maps = googleMapsSearchUrl(hotel.name, hotel.coordinates);
+    const maps = googleMapsPlaceUrl(hotel.name);
     const dining = googleMapsSearchUrl(`top rated restaurant within 1 km of ${hotel.name}`, hotel.coordinates);
     const shopping = googleMapsSearchUrl(`shopping mall or supermarket within 1 km of ${hotel.name}`, hotel.coordinates);
     const nearby = googleMapsSearchUrl(`things to do within 1 km of ${hotel.name}`, hotel.coordinates);
