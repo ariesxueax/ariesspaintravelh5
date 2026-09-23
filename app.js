@@ -26,10 +26,12 @@
     "当地注意": ["西班牙、葡萄牙通用报警电话：112", "中国驻西班牙大使馆：+34 915 438 877、+34 913 206 181", "中国驻葡萄牙大使馆：+351 214 024 855、+351 213 928 430", "外交部领事保护热线：+86 10 12308", "餐厅晚餐时间普遍较晚（晚上 8 点后），需提前预订", "教堂、宫殿注意着装，避免露肩与过短下装", "热门景区与繁华区域注意人身安全，不要外露证件", "水与公厕需备少量零钱（硬币）", "注意欧标插头（C / F 型）"],
     "汇率转换": []
   };
-  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null, mapFocus: null, editingPackingItemId: null };
+  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null, mapFocus: null, editingChecklistItemId: null };
   const savedChecks = JSON.parse(localStorage.getItem("iberia.mobile.checks") || "{}");
-  const customPackingStorageKey = "iberia.mobile.custom-packing-items";
-  let customPackingItems = readCustomPackingItems();
+  const customChecklistStorageKey = "iberia.mobile.custom-checklist-items";
+  const legacyCustomPackingStorageKey = "iberia.mobile.custom-packing-items";
+  const editableChecklistSections = Object.keys(checkSections).filter(section => section !== "汇率转换");
+  let customChecklistItems = readCustomChecklistItems();
   const savedExchangeRate = Number(localStorage.getItem("iberia.mobile.exchange-rate"));
   let exchangeRate = Number.isFinite(savedExchangeRate) && savedExchangeRate > 0 ? savedExchangeRate : 7.8;
   let exchangeRateRevision = 0;
@@ -41,23 +43,33 @@
     return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
   }
 
-  function readCustomPackingItems() {
+  function normalizeCustomChecklistItems(value) {
+    return Array.isArray(value)
+      ? value.filter(item => item && typeof item.id === "string" && typeof item.text === "string" && item.text.trim()).map(item => ({ id: item.id, text: item.text.trim() }))
+      : [];
+  }
+
+  function readCustomChecklistItems() {
+    const items = Object.fromEntries(editableChecklistSections.map(section => [section, []]));
     try {
-      const stored = JSON.parse(localStorage.getItem(customPackingStorageKey) || "[]");
-      return Array.isArray(stored)
-        ? stored.filter(item => item && typeof item.id === "string" && typeof item.text === "string" && item.text.trim()).map(item => ({ id: item.id, text: item.text.trim() }))
-        : [];
+      const stored = JSON.parse(localStorage.getItem(customChecklistStorageKey) || "null");
+      if (stored && typeof stored === "object" && !Array.isArray(stored)) {
+        editableChecklistSections.forEach(section => { items[section] = normalizeCustomChecklistItems(stored[section]); });
+        return items;
+      }
+      items["必备物品"] = normalizeCustomChecklistItems(JSON.parse(localStorage.getItem(legacyCustomPackingStorageKey) || "[]"));
     } catch {
-      return [];
+      // 浏览器禁用本地存储时仍可正常查看默认清单。
     }
+    return items;
   }
 
-  function saveCustomPackingItems() {
-    localStorage.setItem(customPackingStorageKey, JSON.stringify(customPackingItems));
+  function saveCustomChecklistItems() {
+    localStorage.setItem(customChecklistStorageKey, JSON.stringify(customChecklistItems));
   }
 
-  function customPackingItemId() {
-    return `custom-packing-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  function customChecklistItemId() {
+    return `custom-checklist-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   }
 
   const prefetchedImageKeys = new Set();
@@ -325,54 +337,55 @@
       return `<label class="check-row ${savedChecks[id] ? "done" : ""}"><input type="checkbox" data-check="${esc(id)}" ${savedChecks[id] ? "checked" : ""}><span>${esc(item)}</span></label>`;
     }).join("");
     const subtitle = active === "汇率转换" ? "自动读取 EUR/CNY 日参考汇率，也可手动修改。" : "勾选会保留在当前设备，出发前可随时核对。";
-    const content = active === "汇率转换" ? exchangeTool() : `${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/30 00:35 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div>${active === "必备物品" ? customPackingMarkup() : ""}`;
+    const content = active === "汇率转换" ? exchangeTool() : `${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/30 00:35 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div>${customChecklistMarkup(active)}`;
     return `<section class="view checklist-view"><header class="checklist-header"><div class="eyebrow">Ready to go</div><h1>旅行清单</h1><p>${subtitle}</p></header><div class="checklist-tabs">${Object.keys(checkSections).map(name => `<button class="check-tab ${active === name ? "active" : ""}" data-check-section="${name}">${name}</button>`).join("")}</div><div class="check-panel">${content}</div></section>`;
   }
 
-  function customPackingMarkup() {
-    const rows = customPackingItems.map(item => {
-      const checkId = `必备物品-custom-${item.id}`;
-      if (state.editingPackingItemId === item.id) {
-        return `<div class="check-row custom-check-row custom-check-row-editing"><input class="packing-text-input" data-edit-packing-input="${esc(item.id)}" type="text" maxlength="60" value="${esc(item.text)}" aria-label="修改个人必备物品"><span class="packing-edit-actions"><button class="packing-edit-button" data-save-packing-item="${esc(item.id)}" aria-label="保存" title="保存"><i data-lucide="check"></i></button><button class="packing-edit-button" data-cancel-packing-edit aria-label="取消" title="取消"><i data-lucide="x"></i></button></span></div>`;
+  function customChecklistMarkup(section) {
+    const items = customChecklistItems[section] || [];
+    const rows = items.map(item => {
+      const checkId = `${section}-custom-${item.id}`;
+      if (state.editingChecklistItemId === item.id) {
+        return `<div class="check-row custom-check-row custom-check-row-editing"><input class="packing-text-input" data-edit-checklist-input="${esc(item.id)}" type="text" maxlength="60" value="${esc(item.text)}" aria-label="修改个人${esc(section)}补充"><span class="packing-edit-actions"><button class="packing-edit-button" data-save-checklist-item="${esc(item.id)}" data-checklist-section="${esc(section)}" aria-label="保存" title="保存"><i data-lucide="check"></i></button><button class="packing-edit-button" data-cancel-checklist-edit aria-label="取消" title="取消"><i data-lucide="x"></i></button></span></div>`;
       }
-      return `<div class="check-row custom-check-row ${savedChecks[checkId] ? "done" : ""}"><input type="checkbox" data-check="${esc(checkId)}" ${savedChecks[checkId] ? "checked" : ""}><span>${esc(item.text)}</span><button class="packing-edit-button" data-edit-packing-item="${esc(item.id)}" aria-label="修改 ${esc(item.text)}" title="修改"><i data-lucide="pencil"></i></button></div>`;
+      return `<div class="check-row custom-check-row ${savedChecks[checkId] ? "done" : ""}"><input type="checkbox" data-check="${esc(checkId)}" ${savedChecks[checkId] ? "checked" : ""}><span>${esc(item.text)}</span><button class="packing-edit-button" data-edit-checklist-item="${esc(item.id)}" data-checklist-section="${esc(section)}" aria-label="修改 ${esc(item.text)}" title="修改"><i data-lucide="pencil"></i></button></div>`;
     }).join("");
-    return `<section class="custom-packing-group" aria-label="我的补充物品"><div class="custom-packing-heading"><div><span class="eyebrow">Personal list</span><h3>我的补充</h3></div><p>原有清单保持不变</p></div><div class="packing-add-row"><input data-new-packing-item type="text" maxlength="60" placeholder="添加个人必备物品" aria-label="添加个人必备物品"><button class="packing-add-button" data-add-packing-item><i data-lucide="plus"></i><span>新增</span></button></div>${rows ? `<div class="custom-packing-list">${rows}</div>` : `<p class="custom-packing-empty">还没有补充物品</p>`}</section>`;
+    return `<section class="custom-packing-group" aria-label="我的${esc(section)}补充"><div class="custom-packing-heading"><div><span class="eyebrow">Personal list</span><h3>我的补充</h3></div><p>原有清单保持不变</p></div><div class="packing-add-row"><input data-new-checklist-item type="text" maxlength="60" placeholder="添加${esc(section)}补充项目" aria-label="添加${esc(section)}补充项目"><button class="packing-add-button" data-add-checklist-item data-checklist-section="${esc(section)}"><i data-lucide="plus"></i><span>新增</span></button></div>${rows ? `<div class="custom-packing-list">${rows}</div>` : `<p class="custom-packing-empty">还没有补充项目</p>`}</section>`;
   }
 
-  function addCustomPackingItem() {
-    const input = document.querySelector("[data-new-packing-item]");
+  function addCustomChecklistItem(section) {
+    const input = document.querySelector("[data-new-checklist-item]");
     const text = input?.value.trim();
-    if (!text) {
+    if (!text || !editableChecklistSections.includes(section)) {
       input?.focus();
       return;
     }
-    customPackingItems.push({ id: customPackingItemId(), text });
-    saveCustomPackingItems();
+    customChecklistItems[section].push({ id: customChecklistItemId(), text });
+    saveCustomChecklistItems();
     render();
-    document.querySelector("[data-new-packing-item]")?.focus();
+    document.querySelector("[data-new-checklist-item]")?.focus();
   }
 
-  function editCustomPackingItem(id) {
-    if (!customPackingItems.some(item => item.id === id)) return;
-    state.editingPackingItemId = id;
+  function editCustomChecklistItem(section, id) {
+    if (!customChecklistItems[section]?.some(item => item.id === id)) return;
+    state.editingChecklistItemId = id;
     render();
-    const input = document.querySelector("[data-edit-packing-input]");
+    const input = document.querySelector("[data-edit-checklist-input]");
     input?.focus();
     input?.select();
   }
 
-  function saveCustomPackingItem(id) {
-    const item = customPackingItems.find(entry => entry.id === id);
-    const input = document.querySelector(`[data-edit-packing-input="${CSS.escape(id)}"]`);
+  function saveCustomChecklistItem(section, id) {
+    const item = customChecklistItems[section]?.find(entry => entry.id === id);
+    const input = document.querySelector(`[data-edit-checklist-input="${CSS.escape(id)}"]`);
     const text = input?.value.trim();
     if (!item || !text) {
       input?.focus();
       return;
     }
     item.text = text;
-    saveCustomPackingItems();
-    state.editingPackingItemId = null;
+    saveCustomChecklistItems();
+    state.editingChecklistItemId = null;
     render();
   }
 
@@ -645,13 +658,14 @@
     const returnSpotButton = event.target.closest("[data-return-spot]");
     if (returnSpotButton) { openSpot(returnSpotButton.dataset.returnSpot, returnSpotButton.dataset.city); return; }
     const sectionButton = event.target.closest("[data-check-section]");
-    if (sectionButton) { state.checklist = sectionButton.dataset.checkSection; render(); return; }
-    if (event.target.closest("[data-add-packing-item]")) { addCustomPackingItem(); return; }
-    const editPackingButton = event.target.closest("[data-edit-packing-item]");
-    if (editPackingButton) { editCustomPackingItem(editPackingButton.dataset.editPackingItem); return; }
-    const savePackingButton = event.target.closest("[data-save-packing-item]");
-    if (savePackingButton) { saveCustomPackingItem(savePackingButton.dataset.savePackingItem); return; }
-    if (event.target.closest("[data-cancel-packing-edit]")) { state.editingPackingItemId = null; render(); return; }
+    if (sectionButton) { state.checklist = sectionButton.dataset.checkSection; state.editingChecklistItemId = null; render(); return; }
+    const addChecklistButton = event.target.closest("[data-add-checklist-item]");
+    if (addChecklistButton) { addCustomChecklistItem(addChecklistButton.dataset.checklistSection); return; }
+    const editChecklistButton = event.target.closest("[data-edit-checklist-item]");
+    if (editChecklistButton) { editCustomChecklistItem(editChecklistButton.dataset.checklistSection, editChecklistButton.dataset.editChecklistItem); return; }
+    const saveChecklistButton = event.target.closest("[data-save-checklist-item]");
+    if (saveChecklistButton) { saveCustomChecklistItem(saveChecklistButton.dataset.checklistSection, saveChecklistButton.dataset.saveChecklistItem); return; }
+    if (event.target.closest("[data-cancel-checklist-edit]")) { state.editingChecklistItemId = null; render(); return; }
     if (event.target.closest("[data-action='back-cities']")) { state.view = "cities"; state.city = null; render(); return; }
     if (event.target.closest("[data-close-sheet]")) { sheet.close(); return; }
     const mapFood = event.target.closest("[data-map-food]");
@@ -665,7 +679,7 @@
     if (!checkbox) return;
     savedChecks[checkbox.dataset.check] = checkbox.checked;
     localStorage.setItem("iberia.mobile.checks", JSON.stringify(savedChecks));
-    checkbox.closest("label").classList.toggle("done", checkbox.checked);
+    checkbox.closest(".check-row")?.classList.toggle("done", checkbox.checked);
   });
 
   document.addEventListener("input", event => {
@@ -687,9 +701,9 @@
 
   document.addEventListener("keydown", event => {
     if (event.key !== "Enter") return;
-    if (event.target.matches("[data-new-packing-item]")) { event.preventDefault(); addCustomPackingItem(); }
-    const editInput = event.target.closest("[data-edit-packing-input]");
-    if (editInput) { event.preventDefault(); saveCustomPackingItem(editInput.dataset.editPackingInput); }
+    if (event.target.matches("[data-new-checklist-item]")) { event.preventDefault(); addCustomChecklistItem(state.checklist); }
+    const editInput = event.target.closest("[data-edit-checklist-input]");
+    if (editInput) { event.preventDefault(); saveCustomChecklistItem(state.checklist, editInput.dataset.editChecklistInput); }
   });
 
   render();
