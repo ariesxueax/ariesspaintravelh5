@@ -85,8 +85,16 @@
     return `assets/images/mobile/${imageAssetKeys.has(key) ? key : "cover"}.jpg`;
   }
 
+  function mobileWebpForKey(key) {
+    return `assets/images/mobile/${imageAssetKeys.has(key) ? key : "cover"}.webp`;
+  }
+
   function smallImageForKey(key) {
     return `assets/images/small/${imageAssetKeys.has(key) ? key : "cover"}.jpg`;
+  }
+
+  function smallWebpForKey(key) {
+    return `assets/images/small/${imageAssetKeys.has(key) ? key : "cover"}.webp`;
   }
 
   function thumbImageForKey(key) {
@@ -98,13 +106,16 @@
     const loading = options.loading || "lazy";
     const className = options.className ? ` ${options.className}` : "";
     const fetchPriority = options.fetchPriority ? ` fetchpriority="${options.fetchPriority}"` : "";
-    const sources = options.sources === "small"
+    const jpegSources = options.sources === "small"
       ? `${smallImageForKey(safeKey)} 480w`
       : `${smallImageForKey(safeKey)} 480w, ${mobileImageForKey(safeKey)} 900w`;
+    const webpSources = options.sources === "small"
+      ? `${smallWebpForKey(safeKey)} 480w`
+      : `${smallWebpForKey(safeKey)} 480w, ${mobileWebpForKey(safeKey)} 900w`;
     const source = options.sources === "small" ? smallImageForKey(safeKey) : mobileImageForKey(safeKey);
     const sizes = options.sizes || "(max-width: 600px) 100vw, 560px";
     const fallback = mobileImageForKey(options.fallbackKey || "cover");
-    return `<img class="progressive-image${className}" src="${source}" srcset="${sources}" sizes="${sizes}" alt="${esc(alt)}" loading="${loading}"${fetchPriority} decoding="async" style="--image-placeholder:url('${thumbImageForKey(safeKey)}')" onload="this.classList.add('image-ready')" onerror="this.onerror=null;this.removeAttribute('srcset');this.classList.remove('image-ready');this.src='${fallback}'">`;
+    return `<picture class="responsive-picture"><source type="image/webp" srcset="${webpSources}" sizes="${sizes}"><img class="progressive-image${className}" src="${source}" srcset="${jpegSources}" sizes="${sizes}" alt="${esc(alt)}" loading="${loading}"${fetchPriority} decoding="async" style="--image-placeholder:url('${thumbImageForKey(safeKey)}')" onload="this.classList.add('image-ready')" onerror="this.onerror=null;this.removeAttribute('srcset');this.classList.remove('image-ready');this.src='${fallback}'"></picture>`;
   }
 
   function canPrefetchImages() {
