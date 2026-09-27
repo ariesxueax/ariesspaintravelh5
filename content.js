@@ -408,6 +408,10 @@ window.ROADBOOK_CONTENT = {
       image: "assets/analysis/royal-palace-madrid-architectural-analysis.jpg",
       source: "用户提供"
     },
+    "皮拉尔圣母基督大教堂": {
+      image: "assets/analysis/pillar-basilica-architectural-analysis.png",
+      source: "用户提供"
+    },
     "巴特罗之家": {
       image: "assets/analysis/casa-batllo-architectural-analysis.png",
       source: "用户提供"
