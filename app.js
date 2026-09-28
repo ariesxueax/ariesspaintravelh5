@@ -11,11 +11,11 @@
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
   const [itinerary, spainHistoryText] = await Promise.all([
-    fetch("data/itinerary-extraction.json?v=11.7").then(response => {
+    fetch("data/itinerary-extraction.json?v=11.8").then(response => {
       if (!response.ok) throw new Error("行程数据加载失败");
       return response.json();
     }),
-    fetch("data/spain-history.txt?v=11.7").then(response => response.ok ? response.text() : "").catch(() => "")
+    fetch("data/spain-history.txt?v=11.8").then(response => response.ok ? response.text() : "").catch(() => "")
   ]);
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
@@ -606,12 +606,13 @@
     const profile = C.cities[city];
     const visits = cityVisits(city);
     const architecture = profile.architecture || { style: profile.culture, makers: "这座城市的风貌来自不同时代的建造者与日常生活的共同塑造。" };
-    return `<section class="view city-detail"><section class="city-hero">${responsiveImage(imageKeyFor("", city), city, { loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}<span class="city-hero-local-name">${esc(localCityName(city))}</span></h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name"><b>${esc(visit.nameZh)}</b><i class="spot-local-name">${esc(localSpotName(visit.nameZh))}</i>${visit.minimumDurationMinutes ? `<span class="spot-stay">游览${minimumStayLabel(visit)}</span>` : ""}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>吃与带走</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc, city)).join("")}</div></section></section>`;
+    return `<section class="view city-detail"><section class="city-hero">${responsiveImage(imageKeyFor("", city), city, { loading: "eager", fetchPriority: "high", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="city-hero-content"><div class="eyebrow">${esc(profile.en)} · ${esc(profile.country)}</div><h1>${esc(city)}<span class="city-hero-local-name">${esc(localCityName(city))}</span></h1><p>${esc(profile.culture)}</p><div class="city-meta"><span>${esc(profile.days)}</span><span>${C.climate[city] || "十月舒适"}</span><span>${visits.length} 个行程节点</span></div></div></section><section class="city-section"><section class="architecture-panel"><div class="architecture-label">建筑与塑城者</div><p class="culture-copy">${esc(architecture.style)}</p><div class="maker-copy"><b>关键影响人</b><p>${esc(architecture.makers)}</p></div></section><div class="section-head"><h2>本城景点</h2><span class="eyebrow">${visits.length} stops</span></div><div class="spot-list">${visits.map((visit, index) => `<button class="spot-button" data-spot="${esc(visit.nameZh)}" data-city="${esc(city)}"><span class="spot-number">${String(index + 1).padStart(2, "0")}</span><span class="spot-name"><b>${esc(visit.nameZh)}</b><i class="spot-local-name">${esc(localSpotName(visit.nameZh))}</i>${visit.minimumDurationMinutes ? `<span class="spot-stay">游览${minimumStayLabel(visit)}</span>` : ""}<span class="mode-row">${modeTags(visit.modes)}</span></span><i data-lucide="chevron-right"></i></button>`).join("")}</div><div class="section-head"><h2>逛吃推荐</h2></div><div class="food-list">${profile.nearby.map(([name, desc]) => foodCard(name, desc, city)).join("")}</div></section></section>`;
   }
 
   function foodCard(name, desc, city) {
     const icon = /市场|市集|街|区/.test(name) ? "store" : /伴手礼|糖|巧克力|瓷|香水|软木|陶|橄榄油|罐头|花砖/.test(name) ? "shopping-bag" : "utensils";
-    return `<article class="food-card"><span class="food-kind"><i data-lucide="${icon}"></i></span><div class="food-copy"><b>${esc(name)}</b><span>${esc(desc)}</span><button class="food-map-link" data-map-food="${esc(name)}" data-city="${esc(city)}"><i data-lucide="map-pin"></i>在地图中查看位置</button></div></article>`;
+    const mapUrl = googleMapsPlaceUrl(`${name} ${localCityName(city) || city}`);
+    return `<article class="food-card"><span class="food-kind"><i data-lucide="${icon}"></i></span><div class="food-copy"><b>${esc(name)}</b><span>${esc(desc)}</span><a class="food-map-link" href="${esc(mapUrl)}" target="_blank" rel="noopener"><i data-lucide="map-pin"></i>在 Google Maps 中查看</a></div></article>`;
   }
 
   function checklistView() {
@@ -622,7 +623,7 @@
   }
 
   function flightInformationMarkup() {
-    return `<section class="check-group checklist-flight-group"><h3>航班信息</h3><div class="flight-card"><span class="flight-airline">首都航空 · Beijing Capital Airlines</span><strong>JD605 杭州 → 马德里</strong><span>09/30 00:35 起飞 · 08:35 抵达（当地时间）</span><em>计划航程约 14.0 小时</em><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 10/09 08:10 抵达（当地时间）</span><em>计划航程约 13.3 小时</em><small>来源：出团通知第 2 页；航程按当地起降时间及夏令时换算。</small></div></section>`;
+    return `<section class="check-group checklist-flight-group"><h3>航班信息</h3><div class="flight-card"><span class="flight-airline">首都航空 · Beijing Capital Airlines</span><strong>JD605 杭州 → 马德里</strong><span>09/30 00:35 起飞 · 08:35 抵达（当地时间）</span><em>计划航程约 14.0 小时</em><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 10/09 08:10 抵达（当地时间）</span><em>计划航程约 13.3 小时</em><small>来源：行程单；航程按当地起降时间及夏令时换算。</small></div></section>`;
   }
 
   function defaultChecklistMarkup(section) {
@@ -831,7 +832,7 @@
     const religion = kind === "sacred" ? "这里同时是参观地与仍在使用的宗教空间，礼拜、节庆和日常祈祷优先于旅游动线。" : kind === "food" ? "饮食习俗是地方文化的一部分，理解食材与餐桌礼节比只拍成品更有意思。" : kind === "performance" ? "表演传统来自持续的社区实践，现场即兴与观众礼仪同样构成文化的一部分。" : "它的文化意义不仅在外形，也在它如何被城市居民反复使用、纪念和保护。";
     const seasonal = kind === "nature" ? "晴天视野远、风也更强；阴天和雾天请把安全放在照片之前。" : kind === "outdoor" || kind === "shopping" ? "清晨人流较少，傍晚光线更柔；雨后石板与金属栏杆会更滑。" : "开门初段与午后交接的人流通常较缓，室内光线和拍摄规则以现场为准。";
     const nearby = guide.nearby || cityGuide.nearby || "时间充裕可按城市页的推荐继续串联附近街区与公共空间。";
-    const foodHint = profile.nearby?.slice(0, 2).map(([place]) => place).join("、") || "城市页“吃与带走”中的推荐";
+    const foodHint = profile.nearby?.slice(0, 2).map(([place]) => place).join("、") || "城市页“逛吃推荐”中的推荐";
     const giftHint = profile.nearby?.[2]?.[0] || "当地工艺、食材与博物馆商店";
     const detailSections = [
       guideSection(1, "先把它看明白", `<p class="spot-guide-opening">站在这里，先别急着按快门。${esc(overview)}</p><p class="spot-name-card">“${esc(guide.card || `${name}，是理解${city}的一扇现场窗口。`)}”</p><p><b>到场前知道：</b>${esc(category.hours)}</p>`, true),
@@ -1000,8 +1001,6 @@
     if (event.target.closest("[data-cancel-checklist-edit]")) { state.editingChecklistItemId = null; render(); return; }
     if (event.target.closest("[data-action='back-cities']")) { state.view = "cities"; state.city = null; render(); return; }
     if (event.target.closest("[data-close-sheet]")) { sheet.close(); return; }
-    const mapFood = event.target.closest("[data-map-food]");
-    if (mapFood) { const place = C.foodCoordinates?.[mapFood.dataset.mapFood]; state.mapFocus = place?.coordinates || C.cityCoordinates[mapFood.dataset.city]; state.view = "map"; state.city = null; render(); return; }
     const mapSpot = event.target.closest("[data-map-spot]");
     if (mapSpot) { sheet.close(); state.mapFocus = C.poiCoordinates[mapSpot.dataset.mapSpot] || C.cityCoordinates[mapSpot.dataset.city]; state.view = "map"; render(); }
   });
