@@ -10,7 +10,7 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json?v=9.9").then(response => {
+  const itinerary = await fetch("data/itinerary-extraction.json?v=10.6").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
   });
@@ -20,15 +20,31 @@
     ["home", "house", "首页"], ["itinerary", "calendar-days", "行程"], ["map", "map", "地图"], ["cities", "landmark", "城市"], ["checklist", "list-checks", "清单"], ["translation", "languages", "翻译"]
   ];
   const checkSections = {
-    "行前": ["护照、身份证与签证材料分开放置", "国际段建议提前 3 小时抵达机场", "移动电源与备用锂电池必须随身携带", "随团 WiFi：2 人 1 台，行程结束统一回收", "返程跨日抵达杭州，预留次日休整时间"],
-    "必备物品": ["内衣、内裤、袜子 ×7", "睡衣 1 套、拖鞋", "钱包、零钱袋、锁封袋", "烧水杯、泡腾片、转换插头", "垃圾袋、雨衣或雨伞", "过敏药、止泻药、退烧药、晕车药", "湿纸巾、洗脸巾、化妆棉、卫生巾", "洗护用品、防晒、帽子", "U 盘、3C 认证充电宝、数据线", "充电头、Pocket、耳机", "墨镜、零食、现金"],
-    "应用": ["Google Maps：步行、餐厅与公交查询", "Google Translate：离线下载西班牙语、葡萄牙语", "WhatsApp：酒店与当地联络", "Uber / Bolt：城市内叫车备用", "XE Currency：欧元汇率与消费换算"],
-    "当地注意": ["西班牙、葡萄牙通用报警电话：112", "中国驻西班牙大使馆：+34 915 438 877、+34 913 206 181", "中国驻葡萄牙大使馆：+351 214 024 855、+351 213 928 430", "外交部领事保护热线：+86 10 12308", "餐厅晚餐时间普遍较晚（晚上 8 点后），需提前预订", "教堂、宫殿注意着装，避免露肩与过短下装", "热门景区与繁华区域注意人身安全，不要外露证件", "水与公厕需备少量零钱（硬币）", "注意欧标插头（C / F 型）"],
+    "必备清单": [
+      { title: "证件类", items: ["护照", "申根签证", "身份证", "旅行行程单", "护照电子版", "身份证电子版"] },
+      { title: "支付类", items: ["VISA / MASTER 信用卡", "少量欧元[200-500]", "熟悉信用卡一键冻结功能（防止盗刷）"] },
+      { title: "电子类", items: ["欧标 C / F 转换插头", "充电器", "充电线", "充电宝（3C）", "手机取卡针", "U盘", "pocket", "耳机", "其他点子设备"] },
+      { title: "防护类", items: ["挎包", "防盗纽扣", "防盗手链"] },
+      { title: "衣物类", items: ["步行鞋", "薄外套", "内衣袜子", "湿巾 / 脸巾 / 浴巾 / 卫生巾"] },
+      { title: "日用类", items: ["洗护用品", "牙膏牙刷", "剃须刀", "化妆品"] },
+      { title: "旅行类", items: ["雨伞", "口罩", "墨镜", "防晒霜", "帽子", "烧水杯", "拖鞋", "零食", "垃圾袋"] },
+      { title: "药品类", items: ["泡腾片", "过敏药", "止泻药", "退烧药", "晕车药"] },
+      { title: "APP类", items: ["GoogleMap", "GoogleTranslate", "Uber / Bolt", "GlobalBule"] }
+    ],
+    "紧急事项": [
+      { title: "紧急联络", items: [
+        { label: "当地报警", phones: ["112"] },
+        { label: "中驻西大使馆", phones: ["+34 915438877", "+34 913206181"] },
+        { label: "中驻葡大使馆", phones: ["+351 214024855", "+351 213928430"] },
+        { label: "外交部", phones: ["+86 10 12308"] }
+      ] }
+    ],
     "汇率转换": []
   };
-  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null, mapFocus: null, editingChecklistItemId: null, checklistSaveState: { type: "info", message: "新增、修改与勾选会保存到当前浏览器；刷新页面后仍会保留。" } };
+  const state = { view: "home", selectedDay: 2, city: null, checklist: "必备清单", map: null, mapFocus: null, editingChecklistItemId: null, checklistSaveState: { type: "info", message: "新增、修改与勾选会保存到当前浏览器；刷新页面后仍会保留。" } };
   const savedChecks = readStoredJson("iberia.mobile.checks", {});
-  const customChecklistStorageKey = "iberia.mobile.custom-checklist-items";
+  const customChecklistStorageKey = "iberia.mobile.v10.6.custom-checklist-items";
+  const priorCustomChecklistStorageKey = "iberia.mobile.custom-checklist-items";
   const legacyCustomPackingStorageKey = "iberia.mobile.custom-packing-items";
   const editableChecklistSections = Object.keys(checkSections).filter(section => section !== "汇率转换");
   let customChecklistItems = readCustomChecklistItems();
@@ -109,7 +125,15 @@
         editableChecklistSections.forEach(section => { items[section] = normalizeCustomChecklistItems(stored[section]); });
         return items;
       }
-      items["必备物品"] = normalizeCustomChecklistItems(readStoredJson(legacyCustomPackingStorageKey, []));
+      const prior = readStoredJson(priorCustomChecklistStorageKey, null);
+      if (prior && typeof prior === "object" && !Array.isArray(prior)) {
+        items["必备清单"] = ["行前", "必备物品", "应用", "必备清单"].flatMap(section => normalizeCustomChecklistItems(prior[section]));
+        items["紧急事项"] = ["当地注意", "紧急事项"].flatMap(section => normalizeCustomChecklistItems(prior[section]));
+      } else {
+        items["必备清单"] = normalizeCustomChecklistItems(readStoredJson(legacyCustomPackingStorageKey, []));
+      }
+      // 将用户此前自行补充的内容迁入新版分类，避免在合并标签时丢失。
+      try { localStorage.setItem(customChecklistStorageKey, JSON.stringify(items)); } catch {}
     } catch {
       // 浏览器禁用本地存储时仍可正常查看默认清单。
     }
@@ -395,13 +419,30 @@
 
   function checklistView() {
     const active = state.checklist;
-    const rows = checkSections[active].map((item, index) => {
-      const id = `${active}-${index}`;
-      return `<label class="check-row ${savedChecks[id] ? "done" : ""}"><input type="checkbox" data-check="${esc(id)}" ${savedChecks[id] ? "checked" : ""}><span>${esc(item)}</span></label>`;
-    }).join("");
     const subtitle = active === "汇率转换" ? "自动读取 EUR/CNY 日参考汇率，也可手动修改。" : "勾选会保留在当前设备，出发前可随时核对。";
-    const content = active === "汇率转换" ? exchangeTool() : `${active === "行前" ? `<div class="flight-card"><strong>JD605 杭州 → 马德里</strong><span>09/30 00:35 起飞 · 国际段建议提前 3 小时抵达。移动电源、备用锂电池必须随身携带。</span><br><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 返程跨日抵达杭州。</span></div>` : ""}<div class="check-group"><h3>${active}</h3>${rows}</div>${customChecklistMarkup(active)}`;
+    const content = active === "汇率转换" ? exchangeTool() : `${active === "必备清单" ? flightInformationMarkup() : ""}${defaultChecklistMarkup(active)}${customChecklistMarkup(active)}`;
     return `<section class="view checklist-view"><header class="checklist-header"><div class="eyebrow">Ready to go</div><h1>旅行清单</h1><p>${subtitle}</p></header><div class="checklist-tabs">${Object.keys(checkSections).map(name => `<button class="check-tab ${active === name ? "active" : ""}" data-check-section="${name}">${name}</button>`).join("")}</div><div class="check-panel">${content}</div></section>`;
+  }
+
+  function flightInformationMarkup() {
+    return `<section class="check-group checklist-flight-group"><h3>航班信息</h3><div class="flight-card"><span class="flight-airline">首都航空 · Beijing Capital Airlines</span><strong>JD605 杭州 → 马德里</strong><span>09/30 00:35 起飞 · 08:35 抵达（当地时间）</span><em>计划航程约 14.0 小时</em><strong>JD622 里斯本 → 杭州</strong><span>10/08 11:55 起飞 · 10/09 08:10 抵达（当地时间）</span><em>计划航程约 13.3 小时</em><small>来源：出团通知第 2 页；航程按当地起降时间及夏令时换算。</small></div></section>`;
+  }
+
+  function defaultChecklistMarkup(section) {
+    const groups = checkSections[section].map((group, groupIndex) => {
+      const rows = group.items.map((item, itemIndex) => checklistRowMarkup(section, groupIndex, itemIndex, item)).join("");
+      return `<section class="check-group"><h3>${esc(group.title)}</h3>${rows}</section>`;
+    }).join("");
+    return `${groups}<p class="checklist-source">来源：用户提供清单（2026-09-28）。</p>`;
+  }
+
+  function checklistRowMarkup(section, groupIndex, itemIndex, item) {
+    const id = `${section}-${groupIndex}-${itemIndex}`;
+    const done = savedChecks[id] ? "done" : "";
+    const phones = typeof item === "object" ? item.phones || [] : [];
+    const label = typeof item === "object" ? item.label : item;
+    const phoneLinks = phones.length ? `：<span class="check-phone-links">${phones.map(phone => `<a class="check-phone" href="tel:${esc(String(phone).replace(/[^+\d]/g, ""))}">${esc(phone)}</a>`).join("、")}</span>` : "";
+    return `<label class="check-row ${done}"><input type="checkbox" data-check="${esc(id)}" ${savedChecks[id] ? "checked" : ""}><span>${esc(label)}${phoneLinks}</span></label>`;
   }
 
   function customChecklistMarkup(section) {
