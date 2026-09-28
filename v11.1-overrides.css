@@ -1,0 +1,130 @@
+/* v11.1: a dedicated Spain history reader sourced from the user-provided text. */
+.top-action.history-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  min-width: 52px;
+  padding: 0 7px;
+  border-radius: 4px;
+}
+
+.top-action.history-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.top-action.history-action span {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.history-view {
+  min-height: calc(100dvh - 146px);
+  padding-bottom: 24px;
+  background: var(--cream);
+}
+
+.history-header {
+  padding: 23px 18px 22px;
+  color: white;
+  background: var(--forest);
+}
+
+.history-header .eyebrow { color: #edd2a4; }
+
+.history-header h1 {
+  margin: 7px 0 6px;
+  font: 700 30px/1.1 Georgia, "Songti SC", serif;
+}
+
+.history-header p {
+  max-width: 290px;
+  margin: 0;
+  color: rgba(255, 255, 255, .78);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.history-article {
+  padding: 20px 18px 0;
+}
+
+.history-intro {
+  margin: 0;
+  padding: 16px;
+  border-left: 3px solid var(--gold);
+  color: #314440;
+  background: #e8ece5;
+  font-size: 14px;
+  line-height: 1.82;
+}
+
+.history-chapter-title {
+  margin: 29px 0 12px;
+  color: var(--forest);
+  font: 700 21px/1.42 Georgia, "Songti SC", serif;
+}
+
+.history-copy {
+  margin: 0 0 15px;
+  color: #3c4b47;
+  font-size: 14px;
+  line-height: 1.82;
+}
+
+.history-copy strong,
+.history-intro strong {
+  color: #8a5130;
+  font-weight: 800;
+}
+
+.history-copy.is-highlight {
+  padding: 12px 14px;
+  border: 1px solid #e4d8c8;
+  border-radius: 5px;
+  color: #72482c;
+  background: #fbf5ec;
+  font: 700 15px/1.7 Georgia, "Songti SC", serif;
+}
+
+.history-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 0;
+  color: var(--gold);
+}
+
+.history-divider::before,
+.history-divider::after {
+  flex: 1;
+  height: 1px;
+  content: "";
+  background: #ddcfba;
+}
+
+.history-divider span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.history-source {
+  display: block;
+  margin: 30px 0 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.history-unavailable {
+  margin: 20px 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
