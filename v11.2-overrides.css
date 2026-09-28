@@ -1,0 +1,32 @@
+/* v11.2: supports the user-provided numbered history chapters and key-point lists. */
+.history-list {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 17px;
+  padding: 0;
+  list-style: none;
+}
+
+.history-list li {
+  position: relative;
+  padding-left: 16px;
+  color: #3c4b47;
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+.history-list li::before {
+  position: absolute;
+  top: .72em;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  content: "";
+  background: var(--gold);
+}
+
+.history-list strong {
+  color: #8a5130;
+  font-weight: 800;
+}
