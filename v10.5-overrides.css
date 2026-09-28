@@ -1,0 +1,20 @@
+/* v10.5: expose the persistence result instead of silently losing checklist additions. */
+.checklist-save-status {
+  margin: 0;
+  padding: 9px 14px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  background: #f5f4ed;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.checklist-save-status[data-state="success"] {
+  color: #236b42;
+  background: #edf5ed;
+}
+
+.checklist-save-status[data-state="error"] {
+  color: #8a3c35;
+  background: #fbebe8;
+}
