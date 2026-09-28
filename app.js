@@ -10,7 +10,7 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json?v=10.9").then(response => {
+  const itinerary = await fetch("data/itinerary-extraction.json?v=11.0").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
   });
@@ -41,7 +41,7 @@
     ],
     "汇率转换": []
   };
-  const state = { view: "home", selectedDay: 2, city: null, checklist: "必备清单", map: null, mapFocus: null, collapsedDays: new Set(), editingChecklistItemId: null, checklistSaveState: { type: "info", message: "新增、修改与勾选会保存到当前浏览器；刷新页面后仍会保留。" } };
+  const state = { view: "home", selectedDay: 2, city: null, checklist: "必备清单", map: null, mapFocus: null, mapCollapsed: false, collapsedDays: new Set(), editingChecklistItemId: null, checklistSaveState: { type: "info", message: "新增、修改与勾选会保存到当前浏览器；刷新页面后仍会保留。" } };
   const savedChecks = readStoredJson("iberia.mobile.checks", {});
   const customChecklistStorageKey = "iberia.mobile.v10.6.custom-checklist-items";
   const priorCustomChecklistStorageKey = "iberia.mobile.custom-checklist-items";
@@ -531,7 +531,24 @@
   }
 
   function mapView() {
-    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，红色床位点为入住酒店，蓝点为行程景点，绿点为城市代表景点；放大至城市尺度可查看景点名称标签。</p></header><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#c85b4d"></i>入住酒店</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#368f6a"></i>城市代表景点</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${hotelsForDay(day.day).map(hotelRouteLink).join("")}${mapMealTags(day)}</div></div>`).join("")}</div></section>`;
+    const mapAction = state.mapCollapsed ? "展开地图" : "收起地图";
+    const mapIcon = state.mapCollapsed ? "chevron-down" : "chevron-up";
+    return `<section class="view map-view"><header class="map-title"><div class="eyebrow">Interactive route</div><h1>路线地图</h1><p>红点为途经城市，红色床位点为入住酒店，蓝点为行程景点，绿点为城市代表景点；放大至城市尺度可查看景点名称标签。</p><button class="map-collapse-toggle" data-toggle-map aria-expanded="${String(!state.mapCollapsed)}" aria-label="${mapAction}" title="${mapAction}"><i data-lucide="${mapIcon}" aria-hidden="true"></i><span>${mapAction}</span></button></header><section class="map-canvas-panel" data-map-panel ${state.mapCollapsed ? "hidden" : ""}><div id="mobileMap" aria-label="西班牙葡萄牙行程地图"></div><div class="map-legend"><span><i style="background:#c85b4d"></i>途经城市</span><span><i style="background:#c85b4d"></i>入住酒店</span><span><i style="background:#2d6f91"></i>行程景点</span><span><i style="background:#368f6a"></i>城市代表景点</span></div></section><section class="map-stay-section" aria-label="每日住宿信息"><div class="map-stay-heading"><div><div class="eyebrow">Hotel stays</div><h2>每日住宿信息</h2></div><span>点击酒店查看详情</span></div><div class="map-route-list">${itinerary.days.map(day => `<div class="route-day-line"><b>D${day.day}</b><div><span>${esc(day.route.join(" → "))}</span><small>${day.segments.filter(segment => segment.mode === "coach").map(coachEstimateText).join(" · ") || (day.transport.includes("flight") ? "航班日" : day.visits.length ? "市内游览" : "抵达日")}</small>${hotelsForDay(day.day).map(hotelRouteLink).join("")}${mapMealTags(day)}</div></div>`).join("")}</div></section></section>`;
+  }
+
+  function toggleMapPanel() {
+    state.mapCollapsed = !state.mapCollapsed;
+    const panel = document.querySelector("[data-map-panel]");
+    const button = document.querySelector("[data-toggle-map]");
+    if (!panel || !button) return;
+    panel.hidden = state.mapCollapsed;
+    const action = state.mapCollapsed ? "展开地图" : "收起地图";
+    button.setAttribute("aria-expanded", String(!state.mapCollapsed));
+    button.setAttribute("aria-label", action);
+    button.setAttribute("title", action);
+    button.innerHTML = `<i data-lucide="${state.mapCollapsed ? "chevron-down" : "chevron-up"}" aria-hidden="true"></i><span>${action}</span>`;
+    if (!state.mapCollapsed) window.setTimeout(() => state.map?.resize(), 0);
+    refreshIcons();
   }
 
   function hotelsForDay(day) {
@@ -904,6 +921,7 @@
     if (viewButton) { state.view = viewButton.dataset.view; state.city = null; state.mapFocus = null; render(); return; }
     const dayButton = event.target.closest("[data-select-day]");
     if (dayButton) { state.selectedDay = Number(dayButton.dataset.selectDay); render(); return; }
+    if (event.target.closest("[data-toggle-map]")) { toggleMapPanel(); return; }
     const dayToggleButton = event.target.closest("[data-toggle-day]");
     if (dayToggleButton) {
       const day = Number(dayToggleButton.dataset.toggleDay);
