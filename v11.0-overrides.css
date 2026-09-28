@@ -1,0 +1,62 @@
+/* v11.0: keep Home route playback uncluttered and make the Map view collapsible. */
+.mini-route .route-rail {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mini-route .route-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.map-collapse-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  margin-top: 12px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, .45);
+  border-radius: 4px;
+  color: white;
+  background: rgba(255, 255, 255, .1);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.map-collapse-toggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+.map-collapse-toggle:focus-visible {
+  outline: 2px solid #edd2a4;
+  outline-offset: 3px;
+}
+
+.map-stay-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 18px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.map-stay-heading h2 {
+  margin: 4px 0 0;
+  color: var(--forest);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.map-stay-heading > span {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.map-stay-section .map-route-list {
+  padding-top: 4px;
+}
