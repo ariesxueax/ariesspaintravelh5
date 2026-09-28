@@ -1,0 +1,68 @@
+/* v10.8: compact daily collapse controls and source-labelled city weather. */
+.day-flow-head {
+  grid-template-columns: 42px minmax(0, 1fr) auto 32px;
+}
+
+.day-toggle {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--forest);
+  background: var(--paper);
+}
+
+.day-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.day-toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.day-flow.is-collapsed {
+  padding-bottom: 18px;
+}
+
+.city-card,
+.city-card-body {
+  min-height: 270px;
+}
+
+.city-weather {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 3px 7px;
+  align-items: start;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, .23);
+  text-align: left;
+}
+
+.city-weather svg {
+  grid-row: span 2;
+  width: 16px;
+  height: 16px;
+  color: #f0d1a2;
+}
+
+.city-weather span {
+  color: rgba(255, 255, 255, .97);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.city-weather small {
+  color: rgba(255, 255, 255, .72);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
