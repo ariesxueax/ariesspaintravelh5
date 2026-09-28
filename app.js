@@ -11,11 +11,11 @@
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
   const [itinerary, spainHistoryText] = await Promise.all([
-    fetch("data/itinerary-extraction.json?v=11.1").then(response => {
+    fetch("data/itinerary-extraction.json?v=11.2").then(response => {
       if (!response.ok) throw new Error("行程数据加载失败");
       return response.json();
     }),
-    fetch("data/spain-history.txt?v=11.1").then(response => response.ok ? response.text() : "").catch(() => "")
+    fetch("data/spain-history.txt?v=11.2").then(response => response.ok ? response.text() : "").catch(() => "")
   ]);
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
@@ -385,16 +385,31 @@
     if (!blocks.length) {
       return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>西班牙历史</h1></header><p class="history-unavailable">历史内容暂不可用，请稍后刷新页面。</p></section>`;
     }
-    const titleBlock = blocks.shift();
-    const [title, subtitle = ""] = titleBlock.split("：");
-    const introduction = blocks.shift() || "";
+    const numberedChapters = blocks.some(block => /^\d{2}\s*[｜|]/.test(block));
+    let title;
+    let subtitle;
+    let introduction;
+    if (numberedChapters) {
+      title = "西班牙简史";
+      subtitle = "";
+      introduction = blocks.shift() || "";
+    } else {
+      const titleBlock = blocks.shift();
+      [title, subtitle = ""] = titleBlock.split("：");
+      introduction = blocks.shift() || "";
+    }
     const article = blocks.map(block => {
       if (block === "---") return `<div class="history-divider" aria-hidden="true"><span></span></div>`;
       if (block.startsWith("## ")) return `<h2 class="history-chapter-title">${historyInline(block.slice(3))}</h2>`;
+      if (/^\d{2}\s*[｜|]/.test(block)) return `<h2 class="history-chapter-title">${historyInline(block)}</h2>`;
+      const lines = block.split("\n");
+      if (lines.every(line => /^\s*·/.test(line))) {
+        return `<ul class="history-list">${lines.map(line => `<li>${historyInline(line.replace(/^\s*·\s*/, ""))}</li>`).join("")}</ul>`;
+      }
       const isHighlight = /^\*\*[\s\S]+\*\*$/.test(block);
-      return `<p class="history-copy ${isHighlight ? "is-highlight" : ""}">${block.split("\n").map(historyInline).join("<br>")}</p>`;
+      return `<p class="history-copy ${isHighlight ? "is-highlight" : ""}">${lines.map(historyInline).join("<br>")}</p>`;
     }).join("");
-    return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></header><article class="history-article"><p class="history-intro">${historyInline(introduction)}</p>${article}<footer class="history-source">内容来源：用户提供《西班牙简史》</footer></article></section>`;
+    return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ""}</header><article class="history-article"><p class="history-intro">${historyInline(introduction)}</p>${article}<footer class="history-source">内容来源：用户提供《西班牙简史 v2》</footer></article></section>`;
   }
 
   function coachText(segment) {
