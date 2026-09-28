@@ -11,11 +11,11 @@
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
   const [itinerary, spainHistoryText] = await Promise.all([
-    fetch("data/itinerary-extraction.json?v=11.3").then(response => {
+    fetch("data/itinerary-extraction.json?v=11.4").then(response => {
       if (!response.ok) throw new Error("行程数据加载失败");
       return response.json();
     }),
-    fetch("data/spain-history.txt?v=11.3").then(response => response.ok ? response.text() : "").catch(() => "")
+    fetch("data/spain-history.txt?v=11.4").then(response => response.ok ? response.text() : "").catch(() => "")
   ]);
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
@@ -337,7 +337,7 @@
     return `<section class="food-experiences"><div class="food-experiences-head"><div><div class="eyebrow">Taste itinerary</div><h2>三种美食体验</h2></div><span>全程含餐</span></div><div class="food-experience-list">${foods.map(food => `<div class="food-experience"><b>${esc(food.name)}</b><i>${esc(food.local)}</i><small>${esc(food.detail)}</small></div>`).join("")}</div></section>`;
   }
 
-  function travelQuoteMarkup() {
+  function travelQuoteMarkup(placement = "translation-epilogue") {
     const quoteLines = [
       ["To see the world,", "观天地之大,"],
       ["things dangerous to come to.", "涉险远之途,"],
@@ -346,7 +346,11 @@
       ["to find each other,", "觅同道之人,"],
       ["and to feel, That is the purpose of LIFE.", "感万物之道。"]
     ];
-    return `<section class="translation-epilogue" aria-label="旅行引言"><section class="ending-hero ending-hero-barcelona">${responsiveImage("barcelona", "巴塞罗那城市风景", { className: "ending-image", loading: "lazy", sizes: "(max-width: 600px) 100vw, 560px" })}</section><section class="ending-quote" aria-label="旅行引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
+    return `<section class="${placement}" aria-label="旅行引言"><section class="ending-hero ending-hero-barcelona">${responsiveImage("barcelona", "巴塞罗那城市风景", { className: "ending-image", loading: "lazy", sizes: "(max-width: 600px) 100vw, 560px" })}</section><section class="ending-quote" aria-label="旅行引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
+  }
+
+  function voiceTranslationMarkup() {
+    return `<section class="voice-translation-panel" aria-labelledby="voice-translation-title"><header class="voice-translation-head"><div><small>Voice translation</small><h2 id="voice-translation-title">语音翻译</h2></div><i data-lucide="languages" aria-hidden="true"></i></header><p>选择语言方向后录音，服务连接完成后将显示另一种语言的文字。</p><div class="voice-direction-grid"><button type="button" class="voice-direction-button" disabled aria-disabled="true" title="语音翻译服务待配置"><i data-lucide="mic" aria-hidden="true"></i><span>说中文<em>→ 西班牙语</em></span></button><button type="button" class="voice-direction-button" disabled aria-disabled="true" title="语音翻译服务待配置"><i data-lucide="mic" aria-hidden="true"></i><span>说西班牙语<em>→ 中文</em></span></button></div><p class="voice-translation-status" role="status"><i data-lucide="lock-keyhole" aria-hidden="true"></i>语音翻译服务待配置</p></section>`;
   }
 
   function translationView() {
@@ -371,8 +375,8 @@
     };
     return `<section class="view translation-view">
       <header class="translation-header"><div class="eyebrow">Spanish travel essential</div><h1>常用翻译</h1><p>西班牙旅行 10 个场景，随用随查的必备西语与数字读音。</p><div class="translation-key"><span>西语</span><i>IPA 音标</i><b>中文谐音</b><em>中文意思</em></div></header>
+      ${voiceTranslationMarkup()}
       <div class="translation-scene-list">${scenes.map((scene, index) => `<section class="translation-scene"><header class="translation-scene-head"><span>${String(index + 1).padStart(2, "0")}</span><div><small>${esc(scene.local)}</small><h2>${esc(scene.title)}</h2></div><i data-lucide="${scene.icon}"></i></header>${scene.phrases.map(phraseMarkup).join("")}</section>`).join("")}</div>
-      ${travelQuoteMarkup()}
     </section>`;
   }
 
@@ -409,7 +413,7 @@
       const isHighlight = /^\*\*[\s\S]+\*\*$/.test(block);
       return `<p class="history-copy ${isHighlight ? "is-highlight" : ""}">${lines.map(historyInline).join("<br>")}</p>`;
     }).join("");
-    return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ""}</header><article class="history-article"><p class="history-intro">${historyInline(introduction)}</p>${article}<footer class="history-source">内容来源：用户提供</footer></article></section>`;
+    return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ""}</header><article class="history-article"><p class="history-intro">${historyInline(introduction)}</p>${article}<footer class="history-source">内容来源：用户提供</footer>${travelQuoteMarkup("history-epilogue")}</article></section>`;
   }
 
   function coachText(segment) {
