@@ -1,0 +1,31 @@
+/* v10.9: quiet continuous horizontal playback on the two Home carousels. */
+[data-home-auto-scroll].is-auto-scrolling {
+  scroll-snap-type: none;
+}
+
+.translation-epilogue {
+  margin-top: 30px;
+  padding-top: 16px;
+}
+
+.ending-hero.ending-hero-barcelona {
+  min-height: 250px;
+}
+
+.ending-hero.ending-hero-barcelona::after {
+  background: linear-gradient(180deg, rgba(5, 22, 21, .04), rgba(5, 22, 21, .38));
+}
+
+.ending-hero.ending-hero-barcelona .ending-image {
+  object-position: center;
+}
+
+.ending-hero.ending-hero-barcelona + .ending-quote {
+  margin-top: -18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-home-auto-scroll].is-auto-scrolling {
+    scroll-snap-type: x mandatory;
+  }
+}
