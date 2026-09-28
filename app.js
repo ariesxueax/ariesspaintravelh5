@@ -10,6 +10,7 @@
   const translationWorkerOrigin = "https://iberia-voice-translate.aries-xue-ax.workers.dev";
   const voiceTranslationEndpoint = `${translationWorkerOrigin}/voice`;
   const textTranslationEndpoint = `${translationWorkerOrigin}/text`;
+  const maxVoiceRecordingMs = 60000;
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
@@ -341,11 +342,11 @@
   }
 
   function voiceTranslationMarkup() {
-    return `<section class="voice-translation-panel" data-voice-panel aria-labelledby="voice-translation-title"><header class="voice-translation-head"><div><small>Voice translation</small><h2 id="voice-translation-title">语音翻译</h2></div><i data-lucide="languages" aria-hidden="true"></i></header><p>点击一个方向开始录音，再次点击结束；识别后会显示原文与译文。</p><div class="voice-direction-grid"><button type="button" class="voice-direction-button" data-voice-direction="zh-to-es" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说中文<em>→ 西班牙语</em></span></button><button type="button" class="voice-direction-button" data-voice-direction="es-to-zh" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说西班牙语<em>→ 中文</em></span></button></div><div class="voice-translation-result" data-voice-result hidden></div><p class="voice-translation-status" data-voice-status role="status"><i data-lucide="mic" aria-hidden="true"></i>点击开始录音</p></section>`;
+    return `<section class="voice-translation-panel" data-voice-panel aria-labelledby="voice-translation-title"><header class="voice-translation-head"><div><small>Voice translation</small><h2 id="voice-translation-title">语音翻译</h2></div><i data-lucide="languages" aria-hidden="true"></i></header><p>点击一个方向开始录音，再次点击结束；单次录音最长 60 秒。</p><div class="voice-direction-grid"><button type="button" class="voice-direction-button" data-voice-direction="zh-to-es" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说中文<em>→ 西班牙语</em></span></button><button type="button" class="voice-direction-button" data-voice-direction="es-to-zh" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说西班牙语<em>→ 中文</em></span></button></div><div class="voice-translation-result" data-voice-result hidden></div><p class="voice-translation-status" data-voice-status role="status"><i data-lucide="mic" aria-hidden="true"></i>点击开始录音</p></section>`;
   }
 
   function textTranslationMarkup() {
-    return `<section class="text-translation-panel" data-text-panel aria-labelledby="text-translation-title"><header class="text-translation-head"><div><small>Text translation</small><h2 id="text-translation-title">文字翻译</h2></div><i data-lucide="keyboard" aria-hidden="true"></i></header><p>输入中文，即可获得西班牙语表达。</p><label class="text-translation-input"><span>中文</span><textarea data-text-source rows="3" maxlength="500" placeholder="例如：请问洗手间在哪里？" aria-label="输入中文"></textarea></label><button type="button" class="text-translate-button" data-text-translate><i data-lucide="languages" aria-hidden="true"></i>翻译成西班牙语</button><div class="text-translation-result" data-text-result hidden></div><p class="text-translation-status" data-text-status role="status"><i data-lucide="keyboard" aria-hidden="true"></i>最多 500 个汉字</p></section>`;
+    return `<section class="text-translation-panel" data-text-panel aria-labelledby="text-translation-title"><header class="text-translation-head"><div><small>Text translation</small><h2 id="text-translation-title">文字翻译</h2></div><i data-lucide="keyboard" aria-hidden="true"></i></header><p>输入中文，即可获得西班牙语表达。</p><label class="text-translation-input"><span>中文</span><textarea data-text-source rows="3" maxlength="100" placeholder="例如：请问洗手间在哪里？" aria-label="输入中文"></textarea></label><button type="button" class="text-translate-button" data-text-translate><i data-lucide="languages" aria-hidden="true"></i>翻译成西班牙语</button><div class="text-translation-result" data-text-result hidden></div><p class="text-translation-status" data-text-status role="status"><i data-lucide="keyboard" aria-hidden="true"></i>最多 100 个汉字</p></section>`;
   }
 
   function translationView() {
@@ -921,6 +922,7 @@
   let activeSpeechButton = null;
   let voiceRecorder = null;
   let voiceStream = null;
+  let voiceRecordingTimer = null;
   let voiceRequestInFlight = false;
   let textRequestInFlight = false;
 
@@ -958,6 +960,8 @@
   }
 
   function releaseVoiceStream() {
+    if (voiceRecordingTimer) window.clearTimeout(voiceRecordingTimer);
+    voiceRecordingTimer = null;
     voiceStream?.getTracks().forEach(track => track.stop());
     voiceStream = null;
   }
@@ -1080,8 +1084,14 @@
       });
       voiceRecorder = recorder;
       recorder.start();
+      voiceRecordingTimer = window.setTimeout(() => {
+        if (voiceRecorder === recorder && recorder.state !== "inactive") {
+          setVoiceStatus("已录满 60 秒，正在结束录音…", "processing");
+          recorder.stop();
+        }
+      }, maxVoiceRecordingMs);
       setVoiceButtons(direction);
-      setVoiceStatus("正在录音，再次点击同一按钮结束。", "recording");
+      setVoiceStatus("正在录音，再次点击同一按钮结束；最长 60 秒。", "recording");
     } catch {
       releaseVoiceStream();
       setVoiceButtons();
