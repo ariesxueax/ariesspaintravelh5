@@ -1,0 +1,62 @@
+/* v10.6: consolidated packing checklist and tap-to-call emergency contacts. */
+.checklist-flight-group .flight-card {
+  display: grid;
+  gap: 4px;
+}
+
+.flight-card .flight-airline {
+  margin-bottom: 5px;
+  color: #f0d1a2;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.flight-card strong:not(:first-of-type) {
+  margin-top: 9px;
+}
+
+.flight-card em {
+  color: rgba(255, 255, 255, .82);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.flight-card small {
+  margin-top: 8px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, .2);
+  color: rgba(255, 255, 255, .62);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.check-phone-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.check-phone {
+  color: #236b42;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.check-row.done .check-phone {
+  color: inherit;
+}
+
+.check-phone:focus-visible {
+  outline: 2px solid #2f8a57;
+  outline-offset: 2px;
+}
+
+.checklist-source {
+  margin: 13px 2px 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
