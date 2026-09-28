@@ -7,7 +7,9 @@
   const sheet = document.getElementById("detailSheet");
   const sheetContent = document.getElementById("sheetContent");
   const mapboxToken = "pk.eyJ1IjoiYXJpZXN4dWVheDAwMSIsImEiOiJjbGgwMWl4c3Iwb3hkM2dxaHdld2EzMWUwIn0.PKltadPPKCz58RJ0epj0cw";
-  const voiceTranslationEndpoint = "https://iberia-voice-translate.aries-xue-ax.workers.dev/voice";
+  const translationWorkerOrigin = "https://iberia-voice-translate.aries-xue-ax.workers.dev";
+  const voiceTranslationEndpoint = `${translationWorkerOrigin}/voice`;
+  const textTranslationEndpoint = `${translationWorkerOrigin}/text`;
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
@@ -342,6 +344,10 @@
     return `<section class="voice-translation-panel" data-voice-panel aria-labelledby="voice-translation-title"><header class="voice-translation-head"><div><small>Voice translation</small><h2 id="voice-translation-title">语音翻译</h2></div><i data-lucide="languages" aria-hidden="true"></i></header><p>点击一个方向开始录音，再次点击结束；识别后会显示原文与译文。</p><div class="voice-direction-grid"><button type="button" class="voice-direction-button" data-voice-direction="zh-to-es" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说中文<em>→ 西班牙语</em></span></button><button type="button" class="voice-direction-button" data-voice-direction="es-to-zh" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说西班牙语<em>→ 中文</em></span></button></div><div class="voice-translation-result" data-voice-result hidden></div><p class="voice-translation-status" data-voice-status role="status"><i data-lucide="mic" aria-hidden="true"></i>点击开始录音</p></section>`;
   }
 
+  function textTranslationMarkup() {
+    return `<section class="text-translation-panel" data-text-panel aria-labelledby="text-translation-title"><header class="text-translation-head"><div><small>Text translation</small><h2 id="text-translation-title">文字翻译</h2></div><i data-lucide="keyboard" aria-hidden="true"></i></header><p>输入中文，即可获得西班牙语表达。</p><label class="text-translation-input"><span>中文</span><textarea data-text-source rows="3" maxlength="500" placeholder="例如：请问洗手间在哪里？" aria-label="输入中文"></textarea></label><button type="button" class="text-translate-button" data-text-translate><i data-lucide="languages" aria-hidden="true"></i>翻译成西班牙语</button><div class="text-translation-result" data-text-result hidden></div><p class="text-translation-status" data-text-status role="status"><i data-lucide="keyboard" aria-hidden="true"></i>最多 500 个汉字</p></section>`;
+  }
+
   function translationView() {
     const scenes = [
       { title: "基础社交", local: "Saludos", icon: "messages-circle", phrases: [["Hola, buenos días.", "[ˈola ˈbwenos ˈdi.as]", "欧拉，布埃诺斯 迪亚斯", "你好，早上好。"], ["Por favor.", "[poɾ faˈβoɾ]", "波尔 法沃尔", "请。"], ["Muchas gracias.", "[ˈmutʃas ˈɣɾa.sjas]", "穆恰斯 格拉西亚斯", "非常感谢。"]] },
@@ -365,6 +371,7 @@
     return `<section class="view translation-view">
       <header class="translation-header"><div class="eyebrow">Spanish travel essential</div><h1>常用翻译</h1><p>西班牙旅行 10 个场景，随用随查的必备西语与数字读音。</p><div class="translation-key"><span>西语</span><i>IPA 音标</i><b>中文谐音</b><em>中文意思</em></div></header>
       ${voiceTranslationMarkup()}
+      ${textTranslationMarkup()}
       <div class="translation-scene-list">${scenes.map((scene, index) => `<section class="translation-scene"><header class="translation-scene-head"><span>${String(index + 1).padStart(2, "0")}</span><div><small>${esc(scene.local)}</small><h2>${esc(scene.title)}</h2></div><i data-lucide="${scene.icon}"></i></header>${scene.phrases.map(phraseMarkup).join("")}</section>`).join("")}</div>
     </section>`;
   }
@@ -915,6 +922,7 @@
   let voiceRecorder = null;
   let voiceStream = null;
   let voiceRequestInFlight = false;
+  let textRequestInFlight = false;
 
   function voiceDirectionLabels(direction, recording = false) {
     if (recording) return { primary: "结束录音", secondary: "再次点击完成" };
@@ -923,6 +931,10 @@
 
   function voicePanel() {
     return document.querySelector("[data-voice-panel]");
+  }
+
+  function textPanel() {
+    return document.querySelector("[data-text-panel]");
   }
 
   function setVoiceStatus(message, tone = "ready") {
@@ -957,6 +969,58 @@
     const targetLanguage = direction === "zh-to-es" ? "西班牙语翻译" : "中文翻译";
     result.hidden = false;
     result.innerHTML = `<div><small>${sourceLanguage}</small><p lang="${direction === "zh-to-es" ? "zh-CN" : "es"}">${esc(sourceText)}</p></div><div><small>${targetLanguage}</small><p lang="${direction === "zh-to-es" ? "es" : "zh-CN"}">${esc(translatedText)}</p></div>`;
+  }
+
+  function setTextStatus(message, tone = "ready") {
+    const status = textPanel()?.querySelector("[data-text-status]");
+    if (!status) return;
+    status.dataset.tone = tone;
+    status.innerHTML = `<i data-lucide="${tone === "error" ? "circle-alert" : tone === "processing" ? "loader-circle" : tone === "success" ? "circle-check" : "keyboard"}" aria-hidden="true"></i>${esc(message)}`;
+    refreshIcons();
+  }
+
+  function renderTextResult(translation) {
+    const result = textPanel()?.querySelector("[data-text-result]");
+    if (!result) return;
+    result.hidden = false;
+    result.innerHTML = `<small>西班牙语</small><p lang="es">${esc(translation)}</p>`;
+  }
+
+  async function submitTextTranslation() {
+    if (textRequestInFlight) return;
+    const panel = textPanel();
+    const input = panel?.querySelector("[data-text-source]");
+    const button = panel?.querySelector("[data-text-translate]");
+    const text = input?.value.trim();
+    if (!text) {
+      setTextStatus("请先输入中文内容。", "error");
+      input?.focus();
+      return;
+    }
+    textRequestInFlight = true;
+    button.disabled = true;
+    setTextStatus("正在翻译…", "processing");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(textTranslationEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+        signal: controller.signal
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.translation) throw new Error(payload.error || "翻译服务暂时不可用，请稍后重试。");
+      renderTextResult(payload.translation);
+      setTextStatus("翻译完成", "success");
+    } catch (error) {
+      const message = error?.name === "AbortError" ? "请求超时，请稍后重试。" : error?.message || "翻译服务暂时不可用，请稍后重试。";
+      setTextStatus(message, "error");
+    } finally {
+      window.clearTimeout(timeout);
+      textRequestInFlight = false;
+      button.disabled = false;
+    }
   }
 
   async function submitVoiceTranslation(audio, direction) {
@@ -1070,6 +1134,8 @@
   }
 
   document.addEventListener("click", event => {
+    const textTranslateButton = event.target.closest("[data-text-translate]");
+    if (textTranslateButton) { submitTextTranslation(); return; }
     const voiceDirectionButton = event.target.closest("[data-voice-direction]");
     if (voiceDirectionButton) { toggleVoiceRecording(voiceDirectionButton); return; }
     const speechButton = event.target.closest("[data-speak]");
