@@ -7,15 +7,16 @@
   const sheet = document.getElementById("detailSheet");
   const sheetContent = document.getElementById("sheetContent");
   const mapboxToken = "pk.eyJ1IjoiYXJpZXN4dWVheDAwMSIsImEiOiJjbGgwMWl4c3Iwb3hkM2dxaHdld2EzMWUwIn0.PKltadPPKCz58RJ0epj0cw";
+  const voiceTranslationEndpoint = "https://iberia-voice-translate.aries-xue-ax.workers.dev/voice";
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
   const [itinerary, spainHistoryText] = await Promise.all([
-    fetch("data/itinerary-extraction.json?v=11.8").then(response => {
+    fetch("data/itinerary-extraction.json?v=11.9").then(response => {
       if (!response.ok) throw new Error("行程数据加载失败");
       return response.json();
     }),
-    fetch("data/spain-history.txt?v=11.8").then(response => response.ok ? response.text() : "").catch(() => "")
+    fetch("data/spain-history.txt?v=11.9").then(response => response.ok ? response.text() : "").catch(() => "")
   ]);
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
@@ -338,7 +339,7 @@
   }
 
   function voiceTranslationMarkup() {
-    return `<section class="voice-translation-panel" aria-labelledby="voice-translation-title"><header class="voice-translation-head"><div><small>Voice translation</small><h2 id="voice-translation-title">语音翻译</h2></div><i data-lucide="languages" aria-hidden="true"></i></header><p>选择语言方向后录音，服务连接完成后将显示另一种语言的文字。</p><div class="voice-direction-grid"><button type="button" class="voice-direction-button" disabled aria-disabled="true" title="语音翻译服务待配置"><i data-lucide="mic" aria-hidden="true"></i><span>说中文<em>→ 西班牙语</em></span></button><button type="button" class="voice-direction-button" disabled aria-disabled="true" title="语音翻译服务待配置"><i data-lucide="mic" aria-hidden="true"></i><span>说西班牙语<em>→ 中文</em></span></button></div><p class="voice-translation-status" role="status"><i data-lucide="lock-keyhole" aria-hidden="true"></i>语音翻译服务待配置</p></section>`;
+    return `<section class="voice-translation-panel" data-voice-panel aria-labelledby="voice-translation-title"><header class="voice-translation-head"><div><small>Voice translation</small><h2 id="voice-translation-title">语音翻译</h2></div><i data-lucide="languages" aria-hidden="true"></i></header><p>点击一个方向开始录音，再次点击结束；识别后会显示原文与译文。</p><div class="voice-direction-grid"><button type="button" class="voice-direction-button" data-voice-direction="zh-to-es" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说中文<em>→ 西班牙语</em></span></button><button type="button" class="voice-direction-button" data-voice-direction="es-to-zh" aria-pressed="false"><i data-lucide="mic" aria-hidden="true"></i><span>说西班牙语<em>→ 中文</em></span></button></div><div class="voice-translation-result" data-voice-result hidden></div><p class="voice-translation-status" data-voice-status role="status"><i data-lucide="mic" aria-hidden="true"></i>点击开始录音</p></section>`;
   }
 
   function translationView() {
@@ -911,6 +912,118 @@
   }
 
   let activeSpeechButton = null;
+  let voiceRecorder = null;
+  let voiceStream = null;
+  let voiceRequestInFlight = false;
+
+  function voiceDirectionLabels(direction, recording = false) {
+    if (recording) return { primary: "结束录音", secondary: "再次点击完成" };
+    return direction === "zh-to-es" ? { primary: "说中文", secondary: "→ 西班牙语" } : { primary: "说西班牙语", secondary: "→ 中文" };
+  }
+
+  function voicePanel() {
+    return document.querySelector("[data-voice-panel]");
+  }
+
+  function setVoiceStatus(message, tone = "ready") {
+    const status = voicePanel()?.querySelector("[data-voice-status]");
+    if (!status) return;
+    status.dataset.tone = tone;
+    status.innerHTML = `<i data-lucide="${tone === "error" ? "circle-alert" : tone === "recording" ? "radio" : tone === "processing" ? "loader-circle" : "mic"}" aria-hidden="true"></i>${esc(message)}`;
+    refreshIcons();
+  }
+
+  function setVoiceButtons(activeDirection = null, busy = false) {
+    voicePanel()?.querySelectorAll("[data-voice-direction]").forEach(button => {
+      const direction = button.dataset.voiceDirection;
+      const recording = activeDirection === direction;
+      const labels = voiceDirectionLabels(direction, recording);
+      button.disabled = busy || Boolean(activeDirection && !recording);
+      button.classList.toggle("is-recording", recording);
+      button.setAttribute("aria-pressed", String(recording));
+      button.querySelector("span").innerHTML = `${esc(labels.primary)}<em>${esc(labels.secondary)}</em>`;
+    });
+  }
+
+  function releaseVoiceStream() {
+    voiceStream?.getTracks().forEach(track => track.stop());
+    voiceStream = null;
+  }
+
+  function renderVoiceResult(sourceText, translatedText, direction) {
+    const result = voicePanel()?.querySelector("[data-voice-result]");
+    if (!result) return;
+    const sourceLanguage = direction === "zh-to-es" ? "中文原文" : "西班牙语原文";
+    const targetLanguage = direction === "zh-to-es" ? "西班牙语翻译" : "中文翻译";
+    result.hidden = false;
+    result.innerHTML = `<div><small>${sourceLanguage}</small><p lang="${direction === "zh-to-es" ? "zh-CN" : "es"}">${esc(sourceText)}</p></div><div><small>${targetLanguage}</small><p lang="${direction === "zh-to-es" ? "es" : "zh-CN"}">${esc(translatedText)}</p></div>`;
+  }
+
+  async function submitVoiceTranslation(audio, direction) {
+    voiceRequestInFlight = true;
+    setVoiceButtons(null, true);
+    setVoiceStatus("正在识别并翻译…", "processing");
+    const form = new FormData();
+    form.append("audio", audio, "travel-voice.webm");
+    form.append("direction", direction);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 45000);
+    try {
+      const response = await fetch(voiceTranslationEndpoint, { method: "POST", body: form, signal: controller.signal });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.translation || !payload.transcript) throw new Error(payload.error || "语音服务暂时不可用，请稍后重试。");
+      renderVoiceResult(payload.transcript, payload.translation, direction);
+      setVoiceStatus("识别与翻译完成", "success");
+    } catch (error) {
+      const message = error?.name === "AbortError" ? "请求超时，请缩短录音后重试。" : error?.message || "语音服务暂时不可用，请稍后重试。";
+      setVoiceStatus(message, "error");
+    } finally {
+      window.clearTimeout(timeout);
+      voiceRequestInFlight = false;
+      setVoiceButtons();
+    }
+  }
+
+  async function toggleVoiceRecording(button) {
+    const direction = button.dataset.voiceDirection;
+    if (voiceRequestInFlight) return;
+    if (voiceRecorder) {
+      if (voiceRecorder.direction === direction && voiceRecorder.state !== "inactive") voiceRecorder.stop();
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setVoiceStatus("当前浏览器不支持录音，请使用最新版 Safari、Chrome 或微信浏览器。", "error");
+      return;
+    }
+    try {
+      voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const preferredType = ["audio/webm;codecs=opus", "audio/webm"].find(type => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(voiceStream, preferredType ? { mimeType: preferredType } : undefined);
+      const chunks = [];
+      recorder.direction = direction;
+      recorder.addEventListener("dataavailable", event => { if (event.data.size) chunks.push(event.data); });
+      recorder.addEventListener("error", () => setVoiceStatus("录音未完成，请重新开始。", "error"));
+      recorder.addEventListener("stop", async () => {
+        const audio = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+        voiceRecorder = null;
+        releaseVoiceStream();
+        if (!audio.size) {
+          setVoiceButtons();
+          setVoiceStatus("没有收到录音，请再试一次。", "error");
+          return;
+        }
+        await submitVoiceTranslation(audio, direction);
+      });
+      voiceRecorder = recorder;
+      recorder.start();
+      setVoiceButtons(direction);
+      setVoiceStatus("正在录音，再次点击同一按钮结束。", "recording");
+    } catch {
+      releaseVoiceStream();
+      setVoiceButtons();
+      setVoiceStatus("未取得麦克风权限。请在浏览器设置中允许此网站使用麦克风后重试。", "error");
+    }
+  }
 
   function clearSpanishSpeech() {
     if (!activeSpeechButton) return;
@@ -957,6 +1070,8 @@
   }
 
   document.addEventListener("click", event => {
+    const voiceDirectionButton = event.target.closest("[data-voice-direction]");
+    if (voiceDirectionButton) { toggleVoiceRecording(voiceDirectionButton); return; }
     const speechButton = event.target.closest("[data-speak]");
     if (speechButton) { speakSpanish(speechButton.dataset.speak, speechButton); return; }
     const viewButton = event.target.closest("[data-view]");
