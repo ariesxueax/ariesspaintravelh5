@@ -11,11 +11,11 @@
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
   const [itinerary, spainHistoryText] = await Promise.all([
-    fetch("data/itinerary-extraction.json?v=11.2").then(response => {
+    fetch("data/itinerary-extraction.json?v=11.3").then(response => {
       if (!response.ok) throw new Error("行程数据加载失败");
       return response.json();
     }),
-    fetch("data/spain-history.txt?v=11.2").then(response => response.ok ? response.text() : "").catch(() => "")
+    fetch("data/spain-history.txt?v=11.3").then(response => response.ok ? response.text() : "").catch(() => "")
   ]);
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
@@ -409,7 +409,7 @@
       const isHighlight = /^\*\*[\s\S]+\*\*$/.test(block);
       return `<p class="history-copy ${isHighlight ? "is-highlight" : ""}">${lines.map(historyInline).join("<br>")}</p>`;
     }).join("");
-    return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ""}</header><article class="history-article"><p class="history-intro">${historyInline(introduction)}</p>${article}<footer class="history-source">内容来源：用户提供《西班牙简史 v2》</footer></article></section>`;
+    return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ""}</header><article class="history-article"><p class="history-intro">${historyInline(introduction)}</p>${article}<footer class="history-source">内容来源：用户提供</footer></article></section>`;
   }
 
   function coachText(segment) {
