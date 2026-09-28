@@ -1,0 +1,130 @@
+/* v12.0: Chinese text input translated to Spanish beside the retained voice translator. */
+.text-translation-panel {
+  margin: 14px 18px 4px;
+  padding: 15px;
+  border: 1px solid #d8ddd4;
+  border-left: 3px solid var(--forest);
+  background: #f7f8f4;
+}
+
+.text-translation-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.text-translation-head small,
+.text-translation-result small {
+  display: block;
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.text-translation-head h2 {
+  margin: 3px 0 0;
+  color: var(--forest);
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.text-translation-head > svg {
+  width: 21px;
+  height: 21px;
+  color: var(--forest);
+  stroke-width: 1.7;
+}
+
+.text-translation-panel > p:not(.text-translation-status) {
+  margin: 9px 0 0;
+  color: #58645f;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.text-translation-input {
+  display: block;
+  margin-top: 12px;
+}
+
+.text-translation-input > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #68756d;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.text-translation-input textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 82px;
+  padding: 10px 11px;
+  border: 1px solid #cbd4ca;
+  border-radius: 5px;
+  color: var(--ink);
+  background: white;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.text-translation-input textarea:focus {
+  border-color: var(--forest);
+  outline: 2px solid rgba(29, 87, 78, .16);
+  outline-offset: 1px;
+}
+
+.text-translate-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  background: var(--forest);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.text-translate-button:disabled { opacity: .62; }
+.text-translate-button svg { width: 16px; height: 16px; }
+
+.text-translation-result {
+  margin-top: 11px;
+  padding: 10px 11px;
+  border-left: 2px solid var(--gold);
+  background: white;
+}
+
+.text-translation-result p {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.text-translation-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 10px 0 0;
+  color: #7b8881;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.text-translation-status svg { width: 12px; height: 12px; }
+.text-translation-status[data-tone="processing"] { color: var(--forest); }
+.text-translation-status[data-tone="success"] { color: #27724a; }
+.text-translation-status[data-tone="error"] { color: #a34e3d; }
+.text-translation-status[data-tone="processing"] svg { animation: voice-spinner .8s linear infinite; }
