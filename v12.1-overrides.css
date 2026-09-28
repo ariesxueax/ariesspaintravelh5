@@ -1,0 +1,11 @@
+/* v12.1: keep the map action in the title bar so it does not consume map space. */
+.map-title {
+  position: relative;
+}
+
+.map-title .map-collapse-toggle {
+  position: absolute;
+  top: 20px;
+  right: 18px;
+  margin-top: 0;
+}
