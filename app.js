@@ -10,7 +10,7 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json?v=10.7").then(response => {
+  const itinerary = await fetch("data/itinerary-extraction.json?v=10.8").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
   });
@@ -41,7 +41,7 @@
     ],
     "汇率转换": []
   };
-  const state = { view: "home", selectedDay: 2, city: null, checklist: "必备清单", map: null, mapFocus: null, editingChecklistItemId: null, checklistSaveState: { type: "info", message: "新增、修改与勾选会保存到当前浏览器；刷新页面后仍会保留。" } };
+  const state = { view: "home", selectedDay: 2, city: null, checklist: "必备清单", map: null, mapFocus: null, collapsedDays: new Set(), editingChecklistItemId: null, checklistSaveState: { type: "info", message: "新增、修改与勾选会保存到当前浏览器；刷新页面后仍会保留。" } };
   const savedChecks = readStoredJson("iberia.mobile.checks", {});
   const customChecklistStorageKey = "iberia.mobile.v10.6.custom-checklist-items";
   const priorCustomChecklistStorageKey = "iberia.mobile.custom-checklist-items";
@@ -54,6 +54,8 @@
   const allVisits = itinerary.days.flatMap(day => day.visits.filter(visit => !visit.modes.includes("conditional")).map(visit => ({ ...visit, day: day.day, date: day.date })));
   const cityOrder = itinerary.routeNodes.map(node => node.nameZh).filter((city, index, list) => C.cities[city] && list.indexOf(city) === index);
   const cityVisits = city => allVisits.filter(visit => visit.city === city);
+  const cityWeather = Object.create(null);
+  let cityWeatherLoadPromise = null;
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
@@ -316,6 +318,81 @@
     return day.route.filter(city => city !== "杭州").join(" · ") || "杭州";
   }
 
+  function cityTravelDates(city) {
+    return [...new Set(itinerary.days.filter(day => day.route.includes(city)).map(day => day.date))];
+  }
+
+  function weatherLabel(code) {
+    if (code === 0) return "晴";
+    if ([1, 2].includes(code)) return "少云";
+    if (code === 3) return "多云";
+    if ([45, 48].includes(code)) return "雾";
+    if ([51, 53, 55, 56, 57].includes(code)) return "毛毛雨";
+    if ([61, 63, 65, 66, 67].includes(code)) return "雨";
+    if ([71, 73, 75, 77].includes(code)) return "雪";
+    if ([80, 81, 82].includes(code)) return "阵雨";
+    if ([85, 86].includes(code)) return "阵雪";
+    if ([95, 96, 99].includes(code)) return "雷暴";
+    return "天气待定";
+  }
+
+  function cityWeatherMarkup(city) {
+    const forecast = cityWeather[city];
+    let summary = "天气预报加载中";
+    let source = "数据：Open-Meteo 天气预报";
+    if (forecast === null) {
+      summary = "天气预报暂不可用";
+      source = "数据源：Open-Meteo";
+    } else if (forecast) {
+      const entries = cityTravelDates(city).map(date => forecast[date]).filter(Boolean);
+      if (entries.length) {
+        summary = entries.map(entry => `${entry.date.slice(5).replace("-", "/")} ${weatherLabel(entry.code)} ${Math.round(entry.min)}-${Math.round(entry.max)}°C`).join(" · ");
+      } else {
+        summary = "行程日期暂无天气预报";
+      }
+    }
+    return `<i data-lucide="cloud-sun" aria-hidden="true"></i><span>${esc(summary)}</span><small>${esc(source)}</small>`;
+  }
+
+  async function loadCityWeather() {
+    if (cityWeatherLoadPromise) return cityWeatherLoadPromise;
+    cityWeatherLoadPromise = Promise.all(cityOrder.map(async city => {
+      const coordinates = C.cityCoordinates[city];
+      const dates = cityTravelDates(city);
+      if (!coordinates || !dates.length) { cityWeather[city] = null; return; }
+      const [longitude, latitude] = coordinates;
+      const params = new URLSearchParams({
+        latitude: String(latitude),
+        longitude: String(longitude),
+        daily: "weather_code,temperature_2m_max,temperature_2m_min",
+        timezone: "auto",
+        start_date: dates[0],
+        end_date: dates[dates.length - 1]
+      });
+      try {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("Weather request failed");
+        const data = await response.json();
+        if (!Array.isArray(data?.daily?.time)) throw new Error("Weather data missing");
+        cityWeather[city] = Object.fromEntries(data.daily.time.map((date, index) => [date, {
+          date,
+          code: data.daily.weather_code?.[index],
+          min: data.daily.temperature_2m_min?.[index],
+          max: data.daily.temperature_2m_max?.[index]
+        }]));
+      } catch {
+        cityWeather[city] = null;
+      }
+    })).then(() => {
+      if (state.view !== "cities") return;
+      document.querySelectorAll("[data-city-weather]").forEach(element => {
+        element.innerHTML = cityWeatherMarkup(element.dataset.cityWeather);
+      });
+      refreshIcons();
+    });
+    return cityWeatherLoadPromise;
+  }
+
   function topbarMarkup() {
     if (state.view === "city") {
       return `<button class="city-back" data-action="back-cities" aria-label="返回城市"><i data-lucide="arrow-left"></i></button><button class="brand-button" data-view="home"><b>${esc(state.city)}</b><span>城市导览</span></button><button class="top-action" data-view="map" aria-label="打开地图"><i data-lucide="map"></i></button>`;
@@ -374,7 +451,9 @@
     const distance = coachSegments.reduce((sum, segment) => sum + segment.distanceKm, 0);
     const segmentMarkup = day.segments.map(segment => `<div class="flow-travel"><i data-lucide="${segment.mode === "flight" ? "plane" : "bus"}"></i><span>${esc(segment.from)} → ${esc(segment.to)}</span><b>${coachText(segment)}</b></div>`).join("");
     const metrics = distance ? `${distance} km` : day.transport.includes("flight") ? "飞行日" : visits.length ? `${visits.length} 个停留` : "抵达日";
-    return `<section class="day-flow"><header class="day-flow-head"><span class="flow-day">D${String(day.day).padStart(2, "0")}</span><div><small>${day.date} · ${day.weekday}</small><b>${esc(cityNameForRoute(day))}</b></div><em>${metrics}</em></header><div class="day-flow-body">${segmentMarkup}${visits.length ? `<div class="flow-stops">${visits.map((visit, index) => flowStop(visit, index + 1)).join("")}</div>` : `<div class="flow-note"><i data-lucide="${day.transport.includes("flight") ? "plane" : "bed-double"}"></i><span>${esc(day.notes?.[0] || "酒店休整与行前准备")}</span></div>`}</div></section>`;
+    const collapsed = state.collapsedDays.has(day.day);
+    const action = collapsed ? "展开" : "收起";
+    return `<section class="day-flow ${collapsed ? "is-collapsed" : ""}" data-day-flow="${day.day}"><header class="day-flow-head"><span class="flow-day">D${String(day.day).padStart(2, "0")}</span><div><small>${day.date} · ${day.weekday}</small><b>${esc(cityNameForRoute(day))}</b></div><em>${metrics}</em><button class="day-toggle" data-toggle-day="${day.day}" aria-expanded="${String(!collapsed)}" aria-label="${action}第 ${day.day} 天行程" title="${action}"><i data-lucide="${collapsed ? "chevron-down" : "chevron-up"}"></i></button></header><div class="day-flow-body" ${collapsed ? "hidden" : ""}>${segmentMarkup}${visits.length ? `<div class="flow-stops">${visits.map((visit, index) => flowStop(visit, index + 1)).join("")}</div>` : `<div class="flow-note"><i data-lucide="${day.transport.includes("flight") ? "plane" : "bed-double"}"></i><span>${esc(day.notes?.[0] || "酒店休整与行前准备")}</span></div>`}</div></section>`;
   }
 
   function flowStop(visit, index) {
@@ -402,7 +481,7 @@
     const profile = C.cities[city];
     const highlights = C.cityGuideHighlights?.[city] || { style: "城市建筑脉络", makers: "塑造这座城市的人" };
     const eager = index === 0;
-    return `<button class="city-card" data-city-page="${esc(city)}">${responsiveImage(imageKeyFor("", city), city, { loading: eager ? "eager" : "lazy", fetchPriority: eager ? "high" : "", sources: "small", sizes: "(max-width: 600px) calc(100vw - 36px), 524px" })}<span class="city-arrow"><i data-lucide="arrow-up-right"></i></span><div class="city-card-body"><small>${esc(profile.days)} · ${esc(profile.country)}</small><h2>${esc(city)}<span class="city-local-name">${esc(localCityName(city))}</span></h2><div class="city-highlights"><span class="city-highlight"><b>建筑风格</b><i>${esc(highlights.style)}</i></span><span class="city-highlight"><b>关键影响人</b><i>${esc(highlights.makers)}</i></span></div></div></button>`;
+    return `<button class="city-card" data-city-page="${esc(city)}">${responsiveImage(imageKeyFor("", city), city, { loading: eager ? "eager" : "lazy", fetchPriority: eager ? "high" : "", sources: "small", sizes: "(max-width: 600px) calc(100vw - 36px), 524px" })}<span class="city-arrow"><i data-lucide="arrow-up-right"></i></span><div class="city-card-body"><small>${esc(profile.days)} · ${esc(profile.country)}</small><h2>${esc(city)}<span class="city-local-name">${esc(localCityName(city))}</span></h2><div class="city-highlights"><span class="city-highlight"><b>建筑风格</b><i>${esc(highlights.style)}</i></span><span class="city-highlight"><b>关键影响人</b><i>${esc(highlights.makers)}</i></span></div><div class="city-weather" data-city-weather="${esc(city)}">${cityWeatherMarkup(city)}</div></div></button>`;
   }
 
   function cityView(city) {
@@ -692,6 +771,7 @@
     refreshIcons();
     window.scrollTo({ top: 0, behavior: "instant" });
     if (state.view === "map") window.setTimeout(initializeMap, 0);
+    if (state.view === "cities") window.setTimeout(loadCityWeather, 0);
     if (state.view === "checklist" && state.checklist === "汇率转换") window.setTimeout(refreshExchangeRate, 0);
     prefetchForCurrentView();
   }
@@ -753,6 +833,22 @@
     if (viewButton) { state.view = viewButton.dataset.view; state.city = null; state.mapFocus = null; render(); return; }
     const dayButton = event.target.closest("[data-select-day]");
     if (dayButton) { state.selectedDay = Number(dayButton.dataset.selectDay); render(); return; }
+    const dayToggleButton = event.target.closest("[data-toggle-day]");
+    if (dayToggleButton) {
+      const day = Number(dayToggleButton.dataset.toggleDay);
+      if (state.collapsedDays.has(day)) state.collapsedDays.delete(day); else state.collapsedDays.add(day);
+      const flow = dayToggleButton.closest("[data-day-flow]");
+      const body = flow?.querySelector(".day-flow-body");
+      const collapsed = state.collapsedDays.has(day);
+      flow?.classList.toggle("is-collapsed", collapsed);
+      if (body) body.hidden = collapsed;
+      dayToggleButton.setAttribute("aria-expanded", String(!collapsed));
+      dayToggleButton.setAttribute("aria-label", `${collapsed ? "展开" : "收起"}第 ${day} 天行程`);
+      dayToggleButton.title = collapsed ? "展开" : "收起";
+      dayToggleButton.innerHTML = `<i data-lucide="${collapsed ? "chevron-down" : "chevron-up"}"></i>`;
+      refreshIcons();
+      return;
+    }
     const cityButton = event.target.closest("[data-city-page]");
     if (cityButton) { state.city = cityButton.dataset.cityPage; state.view = "city"; render(); return; }
     const spotButton = event.target.closest("[data-spot]");
