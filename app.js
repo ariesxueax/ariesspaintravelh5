@@ -10,10 +10,13 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json?v=11.0").then(response => {
-    if (!response.ok) throw new Error("行程数据加载失败");
-    return response.json();
-  });
+  const [itinerary, spainHistoryText] = await Promise.all([
+    fetch("data/itinerary-extraction.json?v=11.1").then(response => {
+      if (!response.ok) throw new Error("行程数据加载失败");
+      return response.json();
+    }),
+    fetch("data/spain-history.txt?v=11.1").then(response => response.ok ? response.text() : "").catch(() => "")
+  ]);
 
   const modeLabels = { inside: "入内", guided: "官导", outside: "外观", distant: "远观", walk: "步行", free_time: "自由活动", shopping: "购物", show: "演出", food: "品尝" };
   const tabItems = [
@@ -373,6 +376,27 @@
     </section>`;
   }
 
+  function historyInline(text) {
+    return esc(text).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  }
+
+  function historyView() {
+    const blocks = spainHistoryText.trim().split(/\n{2,}/).map(block => block.trim()).filter(Boolean);
+    if (!blocks.length) {
+      return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>西班牙历史</h1></header><p class="history-unavailable">历史内容暂不可用，请稍后刷新页面。</p></section>`;
+    }
+    const titleBlock = blocks.shift();
+    const [title, subtitle = ""] = titleBlock.split("：");
+    const introduction = blocks.shift() || "";
+    const article = blocks.map(block => {
+      if (block === "---") return `<div class="history-divider" aria-hidden="true"><span></span></div>`;
+      if (block.startsWith("## ")) return `<h2 class="history-chapter-title">${historyInline(block.slice(3))}</h2>`;
+      const isHighlight = /^\*\*[\s\S]+\*\*$/.test(block);
+      return `<p class="history-copy ${isHighlight ? "is-highlight" : ""}">${block.split("\n").map(historyInline).join("<br>")}</p>`;
+    }).join("");
+    return `<section class="view history-view"><header class="history-header"><div class="eyebrow">Spain through time</div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></header><article class="history-article"><p class="history-intro">${historyInline(introduction)}</p>${article}<footer class="history-source">内容来源：用户提供《西班牙简史》</footer></article></section>`;
+  }
+
   function coachText(segment) {
     if (segment.mode !== "coach") return segment.duration || "国际航班";
     const hours = Math.round(segment.distanceKm / 75 * 2) / 2;
@@ -463,10 +487,11 @@
   }
 
   function topbarMarkup() {
+    const historyButton = `<button class="top-action history-action" data-view="history" aria-label="查看西班牙历史" title="查看西班牙历史"><i data-lucide="scroll-text" aria-hidden="true"></i><span>历史</span></button>`;
     if (state.view === "city") {
-      return `<button class="city-back" data-action="back-cities" aria-label="返回城市"><i data-lucide="arrow-left"></i></button><button class="brand-button" data-view="home"><b>${esc(state.city)}</b><span>城市导览</span></button><button class="top-action" data-view="map" aria-label="打开地图"><i data-lucide="map"></i></button>`;
+      return `<button class="city-back" data-action="back-cities" aria-label="返回城市"><i data-lucide="arrow-left"></i></button><button class="brand-button" data-view="home"><b>${esc(state.city)}</b><span>城市导览</span></button>${historyButton}`;
     }
-    return `<button class="brand-button" data-view="home"><b>伊比利亚光影纪行</b><span>西班牙 · 葡萄牙 11 天</span></button><button class="top-action" data-view="checklist" aria-label="打开旅行清单"><i data-lucide="list-checks"></i></button>`;
+    return `<button class="brand-button" data-view="home"><b>伊比利亚光影纪行</b><span>西班牙 · 葡萄牙 11 天</span></button>${historyButton}`;
   }
 
   function tabbarMarkup() {
@@ -854,7 +879,7 @@
     if (state.map && state.view !== "map") { state.map.remove(); state.map = null; }
     topbar.innerHTML = topbarMarkup();
     tabbar.innerHTML = tabbarMarkup();
-    app.innerHTML = state.view === "home" ? homeView() : state.view === "itinerary" ? itineraryView() : state.view === "map" ? mapView() : state.view === "cities" ? citiesView() : state.view === "city" ? cityView(state.city) : state.view === "translation" ? translationView() : checklistView();
+    app.innerHTML = state.view === "home" ? homeView() : state.view === "itinerary" ? itineraryView() : state.view === "map" ? mapView() : state.view === "cities" ? citiesView() : state.view === "city" ? cityView(state.city) : state.view === "translation" ? translationView() : state.view === "history" ? historyView() : checklistView();
     refreshIcons();
     window.scrollTo({ top: 0, behavior: "instant" });
     if (state.view === "map") window.setTimeout(initializeMap, 0);
