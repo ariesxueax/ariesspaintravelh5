@@ -10,7 +10,7 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json?v=10.6").then(response => {
+  const itinerary = await fetch("data/itinerary-extraction.json?v=10.7").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
   });
@@ -26,10 +26,10 @@
       { title: "电子类", items: ["欧标 C / F 转换插头", "充电器", "充电线", "充电宝（3C）", "手机取卡针", "U盘", "pocket", "耳机", "其他点子设备"] },
       { title: "防护类", items: ["挎包", "防盗纽扣", "防盗手链"] },
       { title: "衣物类", items: ["步行鞋", "薄外套", "内衣袜子", "湿巾 / 脸巾 / 浴巾 / 卫生巾"] },
-      { title: "日用类", items: ["洗护用品", "牙膏牙刷", "剃须刀", "化妆品"] },
+      { title: "日用类", items: ["洗护用品", "牙膏牙刷", "剃须刀", "化妆品", "耳塞"] },
       { title: "旅行类", items: ["雨伞", "口罩", "墨镜", "防晒霜", "帽子", "烧水杯", "拖鞋", "零食", "垃圾袋"] },
-      { title: "药品类", items: ["泡腾片", "过敏药", "止泻药", "退烧药", "晕车药"] },
-      { title: "APP类", items: ["GoogleMap", "GoogleTranslate", "Uber / Bolt", "GlobalBule"] }
+      { title: "药品类", items: ["泡腾片", "创可贴/碘伏棉签", "过敏药", "止泻药", "退烧药", "止疼片", "晕车药"] },
+      { title: "APP类", items: ["GoogleMap", "GoogleTranslate", "Uber / Bolt", "GlobalBule", "Omio"] }
     ],
     "紧急事项": [
       { title: "紧急联络", items: [
