@@ -10,7 +10,7 @@
   const imageAssetKeys = new Set([
     "alhambra", "april-bridge-new", "avenida-liberdade-new", "bacalhau-new", "barcelona", "belem-tower", "belem-tower-new", "cabo-da-roca", "casa-batllo", "casa-mila", "city-arts-sciences", "city-arts-sciences-new", "columbus-monument", "cover", "cover-peniscola", "discoveries-monument-new", "evora", "evora-cathedral", "evora-old-town", "flamenco", "generalife", "granada", "jeronimos-new", "lisbon", "madrid", "mijas", "paella", "palau-nacional", "park-guell", "pasteis-belem-new", "peniscola", "plaza-de-la-virgen", "plaza-espana-seville", "plaza-mayor-madrid", "puente-nuevo", "roman-temple-evora", "ronda", "rossio-new", "royal-palace-madrid", "sagrada-familia", "serranos-towers", "seville", "seville-cathedral", "tarragona", "valencia", "valencia-cathedral", "zaragoza", "zaragoza-city"
   ]);
-  const itinerary = await fetch("data/itinerary-extraction.json?v=10.8").then(response => {
+  const itinerary = await fetch("data/itinerary-extraction.json?v=10.9").then(response => {
     if (!response.ok) throw new Error("行程数据加载失败");
     return response.json();
   });
@@ -56,6 +56,7 @@
   const cityVisits = city => allVisits.filter(visit => visit.city === city);
   const cityWeather = Object.create(null);
   let cityWeatherLoadPromise = null;
+  let homeAutoScrollCleanup = null;
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
@@ -230,6 +231,74 @@
     }
   }
 
+  function stopHomeAutoScroll() {
+    if (!homeAutoScrollCleanup) return;
+    homeAutoScrollCleanup();
+    homeAutoScrollCleanup = null;
+  }
+
+  function setupHomeAutoScroll() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const scrollers = [...document.querySelectorAll("[data-home-auto-scroll]")]
+      .filter(element => element.scrollWidth > element.clientWidth + 2);
+    if (!scrollers.length) return;
+
+    const controllers = scrollers.map(element => ({ element, position: element.scrollLeft, pausedUntil: performance.now() + 1300 }));
+    const listeners = [];
+    let frameId = 0;
+    let lastFrame = performance.now();
+    let active = true;
+
+    const listen = (element, type, handler, options) => {
+      element.addEventListener(type, handler, options);
+      listeners.push(() => element.removeEventListener(type, handler, options));
+    };
+    const pause = controller => { controller.pausedUntil = Infinity; };
+    const resume = (controller, delay = 900) => {
+      controller.position = controller.element.scrollLeft;
+      controller.pausedUntil = performance.now() + delay;
+    };
+
+    controllers.forEach(controller => {
+      const { element } = controller;
+      element.classList.add("is-auto-scrolling");
+      listen(element, "pointerdown", () => pause(controller), { passive: true });
+      listen(element, "pointerup", () => resume(controller), { passive: true });
+      listen(element, "pointercancel", () => resume(controller), { passive: true });
+      listen(element, "mouseenter", () => pause(controller), { passive: true });
+      listen(element, "mouseleave", () => resume(controller, 500), { passive: true });
+      listen(element, "focusin", () => pause(controller));
+      listen(element, "focusout", () => resume(controller, 500));
+      listen(element, "wheel", () => resume(controller, 1300), { passive: true });
+    });
+
+    const tick = now => {
+      if (!active) return;
+      const elapsed = Math.min(now - lastFrame, 40);
+      lastFrame = now;
+      controllers.forEach(controller => {
+        const { element } = controller;
+        const maxScroll = element.scrollWidth - element.clientWidth;
+        if (now < controller.pausedUntil || maxScroll <= 2) return;
+        controller.position += elapsed * .018;
+        if (controller.position >= maxScroll) {
+          controller.position = 0;
+          controller.pausedUntil = now + 850;
+        }
+        element.scrollLeft = controller.position;
+      });
+      frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    homeAutoScrollCleanup = () => {
+      active = false;
+      cancelAnimationFrame(frameId);
+      listeners.forEach(remove => remove());
+      controllers.forEach(({ element }) => element.classList.remove("is-auto-scrolling"));
+    };
+  }
+
   function modeTags(modes = []) {
     return modes.filter(mode => modeLabels[mode]).map(mode => `<span class="mode-tag ${mode}">${modeLabels[mode]}</span>`).join("");
   }
@@ -274,7 +343,7 @@
       ["to find each other,", "觅同道之人,"],
       ["and to feel, That is the purpose of LIFE.", "感万物之道。"]
     ];
-    return `<section class="translation-epilogue" aria-label="旅行终章"><div class="translation-epilogue-label"><span></span><b>旅程终章</b><span></span></div><section class="ending-hero">${responsiveImage("plaza-espana-seville", "塞维利亚西班牙广场", { className: "ending-image", loading: "lazy", sizes: "(max-width: 600px) 100vw, 560px" })}<div class="ending-hero-copy"><div class="eyebrow">Iberian journey · 2026</div><h1>世界，在路的尽头继续展开</h1></div></section><section class="ending-quote" aria-label="旅行终章引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
+    return `<section class="translation-epilogue" aria-label="旅行引言"><section class="ending-hero ending-hero-barcelona">${responsiveImage("barcelona", "巴塞罗那城市风景", { className: "ending-image", loading: "lazy", sizes: "(max-width: 600px) 100vw, 560px" })}</section><section class="ending-quote" aria-label="旅行引言"><div class="ending-quote-mark" aria-hidden="true">“</div><div class="ending-quote-lines">${quoteLines.map(([english, chinese], index) => `<p class="ending-quote-line ${index === quoteLines.length - 1 ? "is-final" : ""}"><span>${esc(english)}</span><b>${esc(chinese)}</b></p>`).join("")}</div><footer class="ending-source">—— 《白日梦想家》</footer></section><p class="ending-signoff">伊比利亚光影纪行</p></section>`;
   }
 
   function translationView() {
@@ -429,8 +498,8 @@
       <div class="section-head page-pad"><h2>选择行程日</h2><button class="text-button" data-view="itinerary">全部行程 <i data-lucide="arrow-right"></i></button></div>
       <div class="day-scroller">${itinerary.days.map(item => `<button class="day-pill ${item.day === day.day ? "active" : ""}" data-select-day="${item.day}"><b>D${item.day}</b><span>${item.date.slice(5).replace("-", "/")}</span></button>`).join("")}</div>
       <section class="day-journey"><div class="day-journey-head"><div><span>D${day.day} · ${day.weekday}</span><b>${esc(cityNameForRoute(day))}</b></div><em>${coachDistance ? `${coachDistance} km` : day.transport.includes("flight") ? "飞行日" : "市内游览"}</em></div><div class="day-route-string">${day.route.map(stop => `<strong>${esc(stop)}</strong>`).join(`<i data-lucide="chevron-right"></i>`)}</div><div class="transport-summary">${transportSummary}</div></section>
-      <section class="day-attractions"><div class="section-head"><div><div class="eyebrow">Today stops</div><h2>${dayVisits.length ? "今日景点" : "今日安排"}</h2></div><span class="attraction-count">${dayVisits.length ? `${dayVisits.length} 个节点` : "抵达日"}</span></div>${dayVisits.length ? `<div class="attraction-scroller">${dayVisits.map((visit, index) => attractionCard(visit, index + 1)).join("")}</div>` : `<div class="transit-card"><i data-lucide="plane"></i><div><b>${esc(day.notes?.[0] || "行程转场")}</b><span>留出充足时间办理值机与休整，详细提醒见旅行清单。</span></div></div>`}</section>
-      <section class="mini-route"><div class="eyebrow">Route line</div><div class="route-rail">${routeStops.map(stop => `<div class="route-stop"><i></i><strong>${esc(stop.nameZh)}</strong></div>`).join("")}</div></section>
+      <section class="day-attractions"><div class="section-head"><div><div class="eyebrow">Today stops</div><h2>${dayVisits.length ? "今日景点" : "今日安排"}</h2></div><span class="attraction-count">${dayVisits.length ? `${dayVisits.length} 个节点` : "抵达日"}</span></div>${dayVisits.length ? `<div class="attraction-scroller" data-home-auto-scroll="attractions">${dayVisits.map((visit, index) => attractionCard(visit, index + 1)).join("")}</div>` : `<div class="transit-card"><i data-lucide="plane"></i><div><b>${esc(day.notes?.[0] || "行程转场")}</b><span>留出充足时间办理值机与休整，详细提醒见旅行清单。</span></div></div>`}</section>
+      <section class="mini-route"><div class="eyebrow">Route line</div><div class="route-rail" data-home-auto-scroll="route">${routeStops.map(stop => `<div class="route-stop"><i></i><strong>${esc(stop.nameZh)}</strong></div>`).join("")}</div></section>
     </section>`;
   }
 
@@ -764,6 +833,7 @@
   }
 
   function render() {
+    stopHomeAutoScroll();
     if (state.map && state.view !== "map") { state.map.remove(); state.map = null; }
     topbar.innerHTML = topbarMarkup();
     tabbar.innerHTML = tabbarMarkup();
@@ -773,6 +843,7 @@
     if (state.view === "map") window.setTimeout(initializeMap, 0);
     if (state.view === "cities") window.setTimeout(loadCityWeather, 0);
     if (state.view === "checklist" && state.checklist === "汇率转换") window.setTimeout(refreshExchangeRate, 0);
+    if (state.view === "home") setupHomeAutoScroll();
     prefetchForCurrentView();
   }
 
