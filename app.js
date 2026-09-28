@@ -26,13 +26,13 @@
     "当地注意": ["西班牙、葡萄牙通用报警电话：112", "中国驻西班牙大使馆：+34 915 438 877、+34 913 206 181", "中国驻葡萄牙大使馆：+351 214 024 855、+351 213 928 430", "外交部领事保护热线：+86 10 12308", "餐厅晚餐时间普遍较晚（晚上 8 点后），需提前预订", "教堂、宫殿注意着装，避免露肩与过短下装", "热门景区与繁华区域注意人身安全，不要外露证件", "水与公厕需备少量零钱（硬币）", "注意欧标插头（C / F 型）"],
     "汇率转换": []
   };
-  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null, mapFocus: null, editingChecklistItemId: null };
-  const savedChecks = JSON.parse(localStorage.getItem("iberia.mobile.checks") || "{}");
+  const state = { view: "home", selectedDay: 2, city: null, checklist: "行前", map: null, mapFocus: null, editingChecklistItemId: null, checklistSaveState: { type: "info", message: "新增、修改与勾选会保存到当前浏览器；刷新页面后仍会保留。" } };
+  const savedChecks = readStoredJson("iberia.mobile.checks", {});
   const customChecklistStorageKey = "iberia.mobile.custom-checklist-items";
   const legacyCustomPackingStorageKey = "iberia.mobile.custom-packing-items";
   const editableChecklistSections = Object.keys(checkSections).filter(section => section !== "汇率转换");
   let customChecklistItems = readCustomChecklistItems();
-  const savedExchangeRate = Number(localStorage.getItem("iberia.mobile.exchange-rate"));
+  const savedExchangeRate = Number(readStoredValue("iberia.mobile.exchange-rate"));
   let exchangeRate = Number.isFinite(savedExchangeRate) && savedExchangeRate > 0 ? savedExchangeRate : 7.8;
   let exchangeRateRevision = 0;
   const allVisits = itinerary.days.flatMap(day => day.visits.filter(visit => !visit.modes.includes("conditional")).map(visit => ({ ...visit, day: day.day, date: day.date })));
@@ -41,6 +41,58 @@
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+  }
+
+  function setChecklistSaveState(type, message) {
+    state.checklistSaveState = { type, message };
+  }
+
+  function readStoredValue(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      setChecklistSaveState("error", "当前浏览器阻止本地保存。请关闭无痕模式或允许本网站使用网站数据后再试。");
+      return null;
+    }
+  }
+
+  function readStoredJson(key, fallback) {
+    const value = readStoredValue(key);
+    if (!value) return fallback;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return fallback;
+    }
+  }
+
+  function saveStoredJson(key, value, label) {
+    const serialized = JSON.stringify(value);
+    try {
+      localStorage.setItem(key, serialized);
+      if (localStorage.getItem(key) !== serialized) throw new Error("Storage verification failed");
+      setChecklistSaveState("success", `${label}已保存，刷新页面后仍会保留。`);
+      return true;
+    } catch {
+      setChecklistSaveState("error", "保存失败：当前浏览器阻止本地保存。请关闭无痕模式或允许本网站使用网站数据后再试。");
+      return false;
+    }
+  }
+
+  function saveStoredValue(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return localStorage.getItem(key) === value;
+    } catch {
+      return false;
+    }
+  }
+
+  function refreshChecklistSaveStatus() {
+    const status = document.querySelector("[data-checklist-save-status]");
+    if (!status) return;
+    status.textContent = state.checklistSaveState.message;
+    status.dataset.state = state.checklistSaveState.type;
   }
 
   function normalizeCustomChecklistItems(value) {
@@ -52,12 +104,12 @@
   function readCustomChecklistItems() {
     const items = Object.fromEntries(editableChecklistSections.map(section => [section, []]));
     try {
-      const stored = JSON.parse(localStorage.getItem(customChecklistStorageKey) || "null");
+      const stored = readStoredJson(customChecklistStorageKey, null);
       if (stored && typeof stored === "object" && !Array.isArray(stored)) {
         editableChecklistSections.forEach(section => { items[section] = normalizeCustomChecklistItems(stored[section]); });
         return items;
       }
-      items["必备物品"] = normalizeCustomChecklistItems(JSON.parse(localStorage.getItem(legacyCustomPackingStorageKey) || "[]"));
+      items["必备物品"] = normalizeCustomChecklistItems(readStoredJson(legacyCustomPackingStorageKey, []));
     } catch {
       // 浏览器禁用本地存储时仍可正常查看默认清单。
     }
@@ -65,7 +117,7 @@
   }
 
   function saveCustomChecklistItems() {
-    localStorage.setItem(customChecklistStorageKey, JSON.stringify(customChecklistItems));
+    return saveStoredJson(customChecklistStorageKey, customChecklistItems, "补充清单");
   }
 
   function customChecklistItemId() {
@@ -361,7 +413,7 @@
       }
       return `<div class="check-row custom-check-row ${savedChecks[checkId] ? "done" : ""}"><input type="checkbox" data-check="${esc(checkId)}" ${savedChecks[checkId] ? "checked" : ""}><span>${esc(item.text)}</span><button class="packing-edit-button" data-edit-checklist-item="${esc(item.id)}" data-checklist-section="${esc(section)}" aria-label="修改 ${esc(item.text)}" title="修改"><i data-lucide="pencil"></i></button></div>`;
     }).join("");
-    return `<section class="custom-packing-group" aria-label="我的${esc(section)}补充"><div class="custom-packing-heading"><div><span class="eyebrow">Personal list</span><h3>我的补充</h3></div><p>原有清单保持不变</p></div><div class="packing-add-row"><input data-new-checklist-item type="text" maxlength="60" placeholder="添加${esc(section)}补充项目" aria-label="添加${esc(section)}补充项目"><button class="packing-add-button" data-add-checklist-item data-checklist-section="${esc(section)}"><i data-lucide="plus"></i><span>新增</span></button></div>${rows ? `<div class="custom-packing-list">${rows}</div>` : `<p class="custom-packing-empty">还没有补充项目</p>`}</section>`;
+    return `<section class="custom-packing-group" aria-label="我的${esc(section)}补充"><div class="custom-packing-heading"><div><span class="eyebrow">Personal list</span><h3>我的补充</h3></div><p>原有清单保持不变</p></div><p class="checklist-save-status" data-checklist-save-status data-state="${esc(state.checklistSaveState.type)}">${esc(state.checklistSaveState.message)}</p><div class="packing-add-row"><input data-new-checklist-item type="text" maxlength="60" placeholder="添加${esc(section)}补充项目" aria-label="添加${esc(section)}补充项目"><button class="packing-add-button" data-add-checklist-item data-checklist-section="${esc(section)}"><i data-lucide="plus"></i><span>新增</span></button></div>${rows ? `<div class="custom-packing-list">${rows}</div>` : `<p class="custom-packing-empty">还没有补充项目</p>`}</section>`;
   }
 
   function addCustomChecklistItem(section) {
@@ -371,8 +423,9 @@
       input?.focus();
       return;
     }
-    customChecklistItems[section].push({ id: customChecklistItemId(), text });
-    saveCustomChecklistItems();
+    const item = { id: customChecklistItemId(), text };
+    customChecklistItems[section].push(item);
+    if (!saveCustomChecklistItems()) customChecklistItems[section] = customChecklistItems[section].filter(entry => entry.id !== item.id);
     render();
     document.querySelector("[data-new-checklist-item]")?.focus();
   }
@@ -394,8 +447,9 @@
       input?.focus();
       return;
     }
+    const previousText = item.text;
     item.text = text;
-    saveCustomChecklistItems();
+    if (!saveCustomChecklistItems()) item.text = previousText;
     state.editingChecklistItemId = null;
     render();
   }
@@ -442,7 +496,7 @@
         return;
       }
       exchangeRate = nextRate;
-      localStorage.setItem("iberia.mobile.exchange-rate", exchangeRate.toString());
+      saveStoredValue("iberia.mobile.exchange-rate", exchangeRate.toString());
       const rateInput = document.querySelector("[data-exchange-rate]");
       if (rateInput) rateInput.value = formatExchangeRate(exchangeRate);
       syncCurrencyConverter("eur");
@@ -689,8 +743,13 @@
     const checkbox = event.target.closest("[data-check]");
     if (!checkbox) return;
     savedChecks[checkbox.dataset.check] = checkbox.checked;
-    localStorage.setItem("iberia.mobile.checks", JSON.stringify(savedChecks));
+    const previousValue = !checkbox.checked;
+    if (!saveStoredJson("iberia.mobile.checks", savedChecks, "勾选状态")) {
+      savedChecks[checkbox.dataset.check] = previousValue;
+      checkbox.checked = previousValue;
+    }
     checkbox.closest(".check-row")?.classList.toggle("done", checkbox.checked);
+    refreshChecklistSaveStatus();
   });
 
   document.addEventListener("input", event => {
@@ -700,7 +759,7 @@
       if (!Number.isFinite(nextRate) || nextRate <= 0) return;
       exchangeRate = nextRate;
       exchangeRateRevision += 1;
-      localStorage.setItem("iberia.mobile.exchange-rate", exchangeRate.toString());
+      saveStoredValue("iberia.mobile.exchange-rate", exchangeRate.toString());
       const status = document.querySelector("[data-exchange-status]");
       if (status) status.textContent = "已使用手动输入的参考汇率";
       syncCurrencyConverter("eur");
