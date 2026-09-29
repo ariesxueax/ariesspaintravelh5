@@ -6,5 +6,25 @@
   "plaza-de-la-virgen": {
     "title": "Plaza de la Virgen",
     "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Plaza_de_la_Virgen%2C_Valencia%2C_Espa%C3%B1a%2C_2014-06-30%2C_DD_163.JPG/1920px-Plaza_de_la_Virgen%2C_Valencia%2C_Espa%C3%B1a%2C_2014-06-30%2C_DD_163.JPG?utm_source=es.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "alcazar-seville": {
+    "title": "Patio de la Monteria, Real Alcazar de Sevilla",
+    "source": "https://commons.wikimedia.org/wiki/File:Patio_de_la_Monteria_Palace_Pedro_I_Alcazar_Seville_Spain.jpg"
+  },
+  "torre-del-oro": {
+    "title": "Gold Tower, Seville",
+    "source": "https://commons.wikimedia.org/wiki/File:Gold_Tower_Guadalquivir_Seville_Tower_Arabic.jpg"
+  },
+  "maestranza-bullring": {
+    "title": "Plaza de Toros de la Maestranza",
+    "source": "https://commons.wikimedia.org/wiki/File:Seville_bullring01.jpg"
+  },
+  "balco-del-mediterrani": {
+    "title": "Balco del Mediterrani, Tarragona",
+    "source": "https://commons.wikimedia.org/wiki/File:22_El_Balc%C3%B3_del_Mediterrani_(Tarragona),_al_fons_el_port_esportiu.jpg"
+  },
+  "tarragona-amphitheatre": {
+    "title": "Amphitheatre of Tarragona",
+    "source": "https://commons.wikimedia.org/wiki/File:Amphitheatre_of_Tarragona_01.jpg"
   }
 }
