@@ -398,9 +398,9 @@ window.ROADBOOK_CONTENT = {
     "马德里皇宫": "royal-palace-madrid", "太阳门广场和零公里地标": "puerta-del-sol", "马约尔广场": "plaza-mayor-madrid", "伯纳乌球场": "bernabeu",
     "萨拉戈萨城区": "zaragoza-city", "皮拉尔圣母基督大教堂": "pillar-basilica", "国家宫": "palau-nacional", "哥伦布广场纪念碑": "columbus-monument", "米拉之家": "casa-mila", "巴特罗之家": "casa-batllo", "感恩大道": "passeig-de-gracia",
     "圣家族大教堂": "sagrada-familia", "奎尔公园": "park-guell", "La Roca购物村": "barcelona", "西班牙海鲜饭": "paella",
-    "塔拉戈纳地中海观景台": "tarragona", "塔拉戈纳圆形剧场": "tarragona-amphitheatre", "塞拉诺双塔": "serranos-towers", "瓦伦西亚主教堂和塔楼": "valencia-cathedral", "圣女广场": "plaza-de-la-virgen", "科学艺术城": "city-arts-sciences-new",
+    "塔拉戈纳地中海观景台": "balco-del-mediterrani", "塔拉戈纳圆形剧场": "tarragona-amphitheatre", "塞拉诺双塔": "serranos-towers", "瓦伦西亚主教堂和塔楼": "valencia-cathedral", "圣女广场": "plaza-de-la-virgen", "科学艺术城": "city-arts-sciences-new",
     "阿尔罕布拉宫": "alhambra", "阿宫后花园": "generalife", "阿尔拜辛区": "granada", "龙达城区、天然断崖与新桥": "puente-nuevo", "龙达斗牛场": "ronda", "佛朗明戈表演": "flamenco",
-    "塞维利亚西班牙广场": "plaza-espana-seville", "塞维利亚大王宫": "alcazar-seville", "塞维利亚大教堂": "seville-cathedral", "黄金塔": "torre-del-oro", "塞维利亚圆形竞技场": "seville",
+    "塞维利亚西班牙广场": "plaza-espana-seville", "塞维利亚大王宫": "alcazar-seville", "塞维利亚大教堂": "seville-cathedral", "黄金塔": "torre-del-oro", "塞维利亚圆形竞技场": "maestranza-bullring",
     "埃武拉城区": "evora-old-town", "埃武拉罗马神庙": "roman-temple-evora", "埃武拉大教堂": "evora-cathedral", "罗卡角与经纬度纪念碑": "cabo-da-roca", "贝伦塔": "belem-tower-new", "航海发现纪念碑": "discoveries-monument-new", "圣热罗尼姆修道院和教堂": "jeronimos-new", "4月25日大桥": "april-bridge-new", "罗西奥广场": "rossio-new", "自由大道": "avenida-liberdade-new", "百年老店葡式蛋挞": "pasteis-belem-new", "葡萄牙鳕鱼餐": "bacalhau-new"
   },
   architecturalAnalyses: {
